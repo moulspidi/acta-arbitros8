@@ -140,7 +140,25 @@ public class StoredGamesManager implements StoredGamesService, ScoreListener, Te
     }
 
     @Override
-    public void deleteCurrentGame() {
+    
+
+    public void applySetupLineupToFirstSet() {
+        if (mGame == null || mStoredGame == null) return;
+        final int setIndex = 0;
+        // HOME
+        for (PositionType pos : PositionType.listPositions(mGame.getKind())) {
+            int p = mGame.getPlayerAtPositionInStartingLineup(TeamType.HOME, pos, setIndex);
+            mStoredGame.getStartingPlayers(TeamType.HOME, setIndex).setPlayerAt(p, pos);
+            mStoredGame.getCurrentPlayers(TeamType.HOME, setIndex).setPlayerAt(p, pos);
+        }
+        // GUEST
+        for (PositionType pos : PositionType.listPositions(mGame.getKind())) {
+            int p = mGame.getPlayerAtPositionInStartingLineup(TeamType.GUEST, pos, setIndex);
+            mStoredGame.getStartingPlayers(TeamType.GUEST, setIndex).setPlayerAt(p, pos);
+            mStoredGame.getCurrentPlayers(TeamType.GUEST, setIndex).setPlayerAt(p, pos);
+        }
+    }
+public void deleteCurrentGame() {
         mRepository.deleteCurrentGame();
         mStoredGame = null;
     }
@@ -211,6 +229,18 @@ public class StoredGamesManager implements StoredGamesService, ScoreListener, Te
 
     @Override
     public void onPlayerChanged(TeamType teamType, int number, PositionType positionType, ActionOriginType actionOriginType) {
+        int set = mStoredGame.currentSetIndex();
+        if (set > 0) {
+            boolean lastEmpty =
+                    mStoredGame.getPoints(TeamType.HOME, set) == 0 &&
+                    mStoredGame.getPoints(TeamType.GUEST, set) == 0 &&
+                    mStoredGame.getSubstitutions(TeamType.HOME, set).isEmpty() &&
+                    mStoredGame.getSubstitutions(TeamType.GUEST, set).isEmpty() &&
+                    !mStoredGame.isStartingLineupConfirmed(TeamType.HOME, set) &&
+                    !mStoredGame.isStartingLineupConfirmed(TeamType.GUEST, set);
+            if (lastEmpty) set = set - 1;
+        }
+
         saveCurrentGame();
         pushCurrentSetToServer();
     }

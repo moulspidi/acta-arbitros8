@@ -101,6 +101,7 @@ public class GameSetupActivity extends AppCompatActivity {
                     ((StoredGamesManager) storedGamesService).connectGameRecorder(mGame);
                 }
             }
+                        ((StoredGamesManager)storedGamesService).applySetupLineupToFirstSet();
             storedGamesService.saveCurrentGame(true);
         } else {
             storedGamesService.saveSetupGame(mGame);
