@@ -1,0 +1,3 @@
+In app/build.gradle dependencies, ensure:
+compileOnly 'org.projectlombok:lombok:1.18.32'
+annotationProcessor 'org.projectlombok:lombok:1.18.32'

@@ -3,46 +3,47 @@ package com.tonkar.volleyballreferee.engine.api.model;
 import com.google.gson.annotations.SerializedName;
 import com.tonkar.volleyballreferee.engine.game.sanction.SanctionType;
 
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
+import lombok.*;
 /**
  * Sanction DTO (retrocompatible)
  * - Mantiene helpers estáticos e instancia: isPlayer/isCoach/isTeam
  * - Campo opcional improperRequest (JSON: "ir")
  * - Ctor 6-args (Lombok) y ctor 5-args legacy
  */
+@NoArgsConstructor
 @Getter
 @Setter
 @EqualsAndHashCode
-@NoArgsConstructor
+
+
+
+
+
 public class SanctionDto {
 
+    @SerializedName("card")
     private SanctionType card;
+
+    @SerializedName("num")
     private int num;
+
+    @SerializedName("set")
     private int set;
+
+    @SerializedName("hp")
     private int homePoints;
+
+    @SerializedName("gp")
     private int guestPoints;
+
+    @SerializedName("ir")
     private boolean improperRequest;
 
-    // ÚNICO ctor de 6 args (NO uses @AllArgsConstructor)
-    public SanctionDto(SanctionType card, int num, int set, int homePoints, int guestPoints, boolean improperRequest) {
-        this.card = card;
-        this.num = num;
-        this.set = set;
-        this.homePoints = homePoints;
-        this.guestPoints = guestPoints;
-        this.improperRequest = improperRequest;
-    }
-
-    // Ctor de conveniencia (5 args) que delega al de 6
+    /** Legacy ctor (sin IR) para compatibilidad con llamadas existentes */
     public SanctionDto(SanctionType card, int num, int set, int homePoints, int guestPoints) {
         this(card, num, set, homePoints, guestPoints, false);
     }
-}
 
     // ---- Helpers estáticos usados por motor y UI ----
     public static boolean isCoach(int num) { return num == COACH; }
@@ -61,7 +62,11 @@ public class SanctionDto {
     public void setImproperRequest(boolean improperRequest) { this.improperRequest = improperRequest; }
 
     public SanctionDto(SanctionType card, int num, int set, int homePoints, int guestPoints, boolean improperRequest) {
-        this(card, num, set, homePoints, guestPoints);
+        this.card = card;
+        this.num = num;
+        this.set = set;
+        this.homePoints = homePoints;
+        this.guestPoints = guestPoints;
         this.improperRequest = improperRequest;
     }
 }

@@ -1,6 +1,7 @@
 package com.tonkar.volleyballreferee.engine.game;
 
 import com.tonkar.volleyballreferee.engine.team.TeamType;
+import com.tonkar.volleyballreferee.engine.api.model.SanctionDto;
 
 import com.tonkar.volleyballreferee.engine.game.sanction.ISanction;
 import com.tonkar.volleyballreferee.engine.game.score.IScore;
@@ -22,4 +23,6 @@ public interface IGame extends IGeneral, IScore, ITeam, ITimeout, ISanction {
 
 
     void markLastSanctionAsImproperRequest(TeamType teamType);
+
+    SanctionDto getLastSanction(TeamType teamType);
 }
