@@ -403,7 +403,7 @@ public void deleteCurrentGame() {
 
                 if (mGame instanceof IClassicTeam indoorTeam) {
 
-                    CourtDto homeStartingPlayers = set.getStartingLineup(TeamType.HOME);
+                    CourtDto homeStartingPlayers = set.getStartingPlayers(TeamType.HOME);
                     for (PositionType position : PositionType.listPositions(mGame.getKind())) {
                         homeStartingPlayers.setPlayerAt(mGame.getPlayerAtPositionInStartingLineup(TeamType.HOME, position, setIndex),
                                                         position);
@@ -416,7 +416,7 @@ public void deleteCurrentGame() {
                                                          substitution.getHomePoints(), substitution.getGuestPoints()));
                     }
 
-                    CourtDto guestStartingPlayers = set.getStartingLineup(TeamType.GUEST);
+                    CourtDto guestStartingPlayers = set.getStartingPlayers(TeamType.GUEST);
                     for (PositionType position : PositionType.listPositions(mGame.getKind())) {
                         guestStartingPlayers.setPlayerAt(mGame.getPlayerAtPositionInStartingLineup(TeamType.GUEST, position, setIndex),
                                                          position);

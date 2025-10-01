@@ -1300,4 +1300,45 @@ public class ScoreSheetBuilder {
         return box;
     }
     
-}
+
+    // === Helpers añadidos ===
+    private String getSanctionImageClass(SanctionType card) {
+        if (card == null) return "yellow-card-image";
+        switch (card) {
+            case YELLOW: return "yellow-card-image";
+            case RED: return "red-card-image";
+            case RED_EXPULSION: return "expulsion-card-image";
+            case RED_DISQUALIFICATION: return "disqualification-card-image";
+            case DELAY_WARNING: return "delay-warning-image";
+            case DELAY_PENALTY: return "delay-penalty-image";
+            default: return "yellow-card-image";
+        }
+    }
+    
+    private Element createStoredLadder(int setIndex) {
+        Element wrapperDiv = new Element("div");
+        wrapperDiv.appendChild(createTitleDiv(mContext.getString(R.string.ladder_tab)).addClass("spacing-before"));
+
+        int homeScore = 0;
+        int guestScore = 0;
+
+        Element ladderDiv = new Element("div");
+        ladderDiv.addClass("div-flex-row");
+
+        TeamType firstServingTeam = mStoredGame.getFirstServingTeam(setIndex);
+        ladderDiv.appendChild(createServiceLadderItem(firstServingTeam));
+
+        for (TeamType teamType : mStoredGame.getPointsLadder(setIndex)) {
+            if (TeamType.HOME.equals(teamType)) {
+                homeScore++;
+                ladderDiv.appendChild(createLadderItem(teamType, homeScore));
+            } else {
+                guestScore++;
+                ladderDiv.appendChild(createLadderItem(teamType, guestScore));
+            }
+        }
+
+        wrapperDiv.appendChild(ladderDiv);
+        return wrapperDiv;
+    }
+    }
