@@ -15,35 +15,34 @@ import lombok.Setter;
  * - Campo opcional improperRequest (JSON: "ir")
  * - Ctor 6-args (Lombok) y ctor 5-args legacy
  */
-@NoArgsConstructor
-@AllArgsConstructor
 @Getter
 @Setter
 @EqualsAndHashCode
+@NoArgsConstructor
 public class SanctionDto {
 
-    @SerializedName("card")
     private SanctionType card;
-
-    @SerializedName("num")
     private int num;
-
-    @SerializedName("set")
     private int set;
-
-    @SerializedName("hp")
     private int homePoints;
-
-    @SerializedName("gp")
     private int guestPoints;
-
-    @SerializedName("ir")
     private boolean improperRequest;
 
-    /** Legacy ctor (sin IR) para compatibilidad con llamadas existentes */
+    // ÚNICO ctor de 6 args (NO uses @AllArgsConstructor)
+    public SanctionDto(SanctionType card, int num, int set, int homePoints, int guestPoints, boolean improperRequest) {
+        this.card = card;
+        this.num = num;
+        this.set = set;
+        this.homePoints = homePoints;
+        this.guestPoints = guestPoints;
+        this.improperRequest = improperRequest;
+    }
+
+    // Ctor de conveniencia (5 args) que delega al de 6
     public SanctionDto(SanctionType card, int num, int set, int homePoints, int guestPoints) {
         this(card, num, set, homePoints, guestPoints, false);
     }
+}
 
     // ---- Helpers estáticos usados por motor y UI ----
     public static boolean isCoach(int num) { return num == COACH; }
