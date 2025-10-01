@@ -1,0 +1,66 @@
+--- /mnt/data/app_src/acta-arbitros7-6496243a6df1158a7708381ee37a2cb9a4ce5e33/app/src/main/java/com/tonkar/volleyballreferee/ui/game/sanction/DelaySanctionSelectionFragment.java
++++ /mnt/data/app_modified/app/src/main/java/com/tonkar/volleyballreferee/ui/game/sanction/DelaySanctionSelectionFragment.java
+@@ -5,6 +5,8 @@
+ 
+ import androidx.annotation.NonNull;
+ import androidx.fragment.app.Fragment;
++
++import android.widget.Toast;
+ 
+ import com.tonkar.volleyballreferee.R;
+ import com.tonkar.volleyballreferee.engine.game.IGame;
+@@ -78,6 +80,19 @@
+         mSelectedDelaySanction = null;
+         mSanctionSelectionDialogFragment.computeOkAvailability(R.id.delay_sanction_tab);
+ 
++        // Improper Request (IR): map to next delay sanction (warning or penalty)
++        View improperRequest = view.findViewById(R.id.btn_improper_request);
++        if (improperRequest != null) {
++            improperRequest.setOnClickListener(v -> {
++                TeamType team = mSanctionSelectionDialogFragment.getSelectedTeamType();
++                // Decide next delay sanction based on history
++                SanctionType next = mGame.getPossibleDelaySanction(team);
++                mGame.giveSanction(team, next, /*TEAM*/ 200);
++                Toast.makeText(requireContext(), getString(R.string.improper_request_recorded, next.name()), Toast.LENGTH_SHORT).show();
++                mSanctionSelectionDialogFragment.dismiss();
++            });
++        }
++
+         return view;
+     }
+ 
+--- /mnt/data/app_src/acta-arbitros7-6496243a6df1158a7708381ee37a2cb9a4ce5e33/app/src/main/res/layout/fragment_delay_sanction_selection.xml
++++ /mnt/data/app_modified/app/src/main/res/layout/fragment_delay_sanction_selection.xml
+@@ -25,6 +25,14 @@
+             android:layout_margin="@dimen/default_margin_size"
+             android:text="@string/yellow_card"
+             android:textAllCaps="false" />
++        <com.google.android.material.button.MaterialButton
++            android:id="@+id/btn_improper_request"
++            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
++            android:layout_width="match_parent"
++            android:layout_height="wrap_content"
++            android:text="@string/improper_request_ir"
++            android:layout_marginTop="8dp" />
++
+ 
+     </LinearLayout>
+ 
+--- /mnt/data/app_src/acta-arbitros7-6496243a6df1158a7708381ee37a2cb9a4ce5e33/app/src/main/res/values/strings.xml
++++ /mnt/data/app_modified/app/src/main/res/values/strings.xml
+@@ -477,4 +477,6 @@
+     <string name="close_match">Close match</string>
+ 
+     <string name="apply_and_return">Apply &amp; return</string>
++    <string name="improper_request_ir">Improper Request (IR)</string>
++    <string name="improper_request_recorded">Improper Request recorded: %1$s</string>
+ </resources>
+--- /mnt/data/app_src/acta-arbitros7-6496243a6df1158a7708381ee37a2cb9a4ce5e33/app/src/main/res/values-es/strings.xml
++++ /mnt/data/app_modified/app/src/main/res/values-es/strings.xml
+@@ -347,4 +347,6 @@
+     <string name="asistant_coach_guest">Asistente de entrenador (Guest)</string>
+     <string name="staff_home">Staff (Home)</string>
+     <string name="staff_guest">Staff (Guest)</string>
++    <string name="improper_request_ir">Solicitud improcedente (IR)</string>
++    <string name="improper_request_recorded">Solicitud improcedente registrada: %1$s</string>
+ </resources>

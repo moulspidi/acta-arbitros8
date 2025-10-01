@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <exclude domain="sharedpref" path="secure_prefs.xml"/>
+    <exclude domain="sharedpref" path="score_sheet_licences.xml"/>
+    <exclude domain="sharedpref" path="user_prefs.xml"/>
+</full-backup-content>
