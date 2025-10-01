@@ -139,9 +139,6 @@ public class StoredGamesManager implements StoredGamesService, ScoreListener, Te
         saveCurrentGame(false);
     }
 
-    @Override
-    
-
     public void applySetupLineupToFirstSet() {
         if (mGame == null || mStoredGame == null) return;
         final int setIndex = 0;
