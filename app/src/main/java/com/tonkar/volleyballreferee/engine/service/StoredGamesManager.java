@@ -148,14 +148,14 @@ public class StoredGamesManager implements StoredGamesService, ScoreListener, Te
         // HOME
         for (PositionType pos : PositionType.listPositions(mGame.getKind())) {
             int p = mGame.getPlayerAtPositionInStartingLineup(TeamType.HOME, pos, setIndex);
-            mStoredGame.getStartingPlayers(TeamType.HOME, setIndex).setPlayerAt(p, pos);
-            mStoredGame.getCurrentPlayers(TeamType.HOME, setIndex).setPlayerAt(p, pos);
+            mStoredGame.getStartingLineup(TeamType.HOME, setIndex).setPlayerAt(p, pos);
+            mStoredGame.getSets().get(setIndex).getCurrentPlayers(TeamType.HOME).setPlayerAt(p, pos);
         }
         // GUEST
         for (PositionType pos : PositionType.listPositions(mGame.getKind())) {
             int p = mGame.getPlayerAtPositionInStartingLineup(TeamType.GUEST, pos, setIndex);
-            mStoredGame.getStartingPlayers(TeamType.GUEST, setIndex).setPlayerAt(p, pos);
-            mStoredGame.getCurrentPlayers(TeamType.GUEST, setIndex).setPlayerAt(p, pos);
+            mStoredGame.getStartingLineup(TeamType.GUEST, setIndex).setPlayerAt(p, pos);
+            mStoredGame.getSets().get(setIndex).getCurrentPlayers(TeamType.GUEST).setPlayerAt(p, pos);
         }
     }
 public void deleteCurrentGame() {
