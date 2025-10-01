@@ -148,6 +148,13 @@ public class StoredGamesManager implements StoredGamesService, ScoreListener, Te
             mStoredGame.getStartingLineup(TeamType.HOME, setIndex).setPlayerAt(p, pos);
             mStoredGame.getSets().get(setIndex).getCurrentPlayers(TeamType.HOME).setPlayerAt(p, pos);
         }
+
+    public void syncLiveGameFromStored() {
+        if (mGame == null || mStoredGame == null) return;
+        // Reconstruye el juego vivo desde el almacenado
+        mGame.restoreGame(mStoredGame);
+    }
+    
         // GUEST
         for (PositionType pos : PositionType.listPositions(mGame.getKind())) {
             int p = mGame.getPlayerAtPositionInStartingLineup(TeamType.GUEST, pos, setIndex);

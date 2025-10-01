@@ -148,6 +148,8 @@ public class GameSetupActivity extends AppCompatActivity {
                 mGame.setUpdatedAt(TeamType.GUEST, System.currentTimeMillis());
                 if (storedGamesService instanceof StoredGamesManager) {
                     ((StoredGamesManager) storedGamesService).connectGameRecorder(mGame);
+                    ((StoredGamesManager) storedGamesService).applySetupLineupToFirstSet();
+                    ((StoredGamesManager) storedGamesService).syncLiveGameFromStored();
                 }
             }
             storedGamesService.saveCurrentGame(true);
