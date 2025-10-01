@@ -3,8 +3,12 @@ package com.tonkar.volleyballreferee.engine.api.model;
 import com.google.gson.annotations.SerializedName;
 import com.tonkar.volleyballreferee.engine.game.sanction.SanctionType;
 
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-import lombok.*;
 /**
  * Sanction DTO (retrocompatible)
  * - Mantiene helpers estáticos e instancia: isPlayer/isCoach/isTeam
@@ -12,14 +16,10 @@ import lombok.*;
  * - Ctor 6-args (Lombok) y ctor 5-args legacy
  */
 @NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
 @EqualsAndHashCode
-
-
-
-
-
 public class SanctionDto {
 
     @SerializedName("card")
@@ -57,16 +57,4 @@ public class SanctionDto {
 
     public static final int COACH = 100;
     public static final int TEAM  = 200;
-
-    public boolean isImproperRequest() { return improperRequest; }
-    public void setImproperRequest(boolean improperRequest) { this.improperRequest = improperRequest; }
-
-    public SanctionDto(SanctionType card, int num, int set, int homePoints, int guestPoints, boolean improperRequest) {
-        this.card = card;
-        this.num = num;
-        this.set = set;
-        this.homePoints = homePoints;
-        this.guestPoints = guestPoints;
-        this.improperRequest = improperRequest;
-    }
 }

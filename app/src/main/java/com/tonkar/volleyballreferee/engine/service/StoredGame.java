@@ -27,9 +27,21 @@ public class StoredGame extends GameDto implements IStoredGame {
         }
     }
 
+    
     public int currentSetIndex() {
-        return getNumberOfSets() - 1;
+        int last = getNumberOfSets() - 1;
+        if (last > 0) {
+            // Check if the trailing set is effectively empty (no points, no substitutions, no starting lineup confirmed)
+            boolean noPoints = getPoints(TeamType.HOME, last) == 0 && getPoints(TeamType.GUEST, last) == 0;
+            boolean noSubs = getSubstitutions(TeamType.HOME, last).isEmpty() && getSubstitutions(TeamType.GUEST, last).isEmpty();
+            boolean noLineup = !isStartingLineupConfirmed(TeamType.HOME, last) && !isStartingLineupConfirmed(TeamType.GUEST, last);
+            if (noPoints && noSubs && noLineup) {
+                return last - 1;
+            }
+        }
+        return last;
     }
+
 
     public TeamDto getTeam(TeamType teamType) {
         return TeamType.HOME.equals(teamType) ? getHomeTeam() : getGuestTeam();

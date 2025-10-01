@@ -550,20 +550,126 @@ public class ScoreSheetBuilder {
     }
 
     private Element createSanctionDiv(TeamType teamType, SanctionDto sanction) {
-        Element sanctionDiv = new Element("div");
+        org.jsoup.nodes.Element sanctionDiv = new org.jsoup.nodes.Element("div");
         sanctionDiv.addClass("div-grid-sanction");
 
         int player = sanction.getNum();
 
-        String score = String.format(Locale.getDefault(), "%d-%d",
-                                     TeamType.HOME.equals(teamType) ? sanction.getHomePoints() : sanction.getGuestPoints(),
-                                     TeamType.HOME.equals(teamType) ? sanction.getGuestPoints() : sanction.getHomePoints());
-
-        sanctionDiv.appendChild(new Element("div").addClass(getSanctionImageClass(sanction.getCard())));
+        // Icono / clase de la sanción y jugador implicado
+        sanctionDiv.appendChild(new org.jsoup.nodes.Element("div").addClass(getSanctionImageClass(sanction.getCard())));
         sanctionDiv.appendChild(createPlayerSpan(teamType, player, mStoredGame.isLibero(teamType, player)));
+
+        // Reconstrucción segura del marcador
+        String score = String.format(
+                java.util.Locale.getDefault(),
+                "%d-%d",
+                (com.tonkar.volleyballreferee.engine.team.TeamType.HOME.equals(teamType) ? sanction.getHomePoints() : sanction.getGuestPoints()),
+                (com.tonkar.volleyballreferee.engine.team.TeamType.HOME.equals(teamType) ? sanction.getGuestPoints() : sanction.getHomePoints())
+        );
+
+        // Badge textual para la familia de demora
+        String delayLabel = null;
+        try {
+            if (sanction.getCard().isDelaySanctionType()) {
+                if (sanction.isImproperRequest()) {
+                    delayLabel = "IR";
+                } else if (sanction.getCard() == com.tonkar.volleyballreferee.engine.game.sanction.SanctionType.DELAY_WARNING) {
+                    delayLabel = "Delay Warning";
+                } else if (sanction.getCard() == com.tonkar.volleyballreferee.engine.game.sanction.SanctionType.DELAY_PENALTY) {
+                    delayLabel = "Delay Penalty";
+                }
+            }
+        } catch (Throwable ignored) { }
+
+        if (delayLabel != null && (score == null || score.isEmpty())) {
+            score = delayLabel;
+        } else if (delayLabel != null) {
+            score = delayLabel + " · " + score;
+        }
+
+        sanctionDiv.appendChild(createCellSpan(score, false, false));
+        return sanctionDiv;
+}
+} catch (Throwable ignored) {}
+        
+        // Build delay label for clarity
+        try {
+            if (sanction.getCard().isDelaySanctionType()) {
+                if (sanction.isImproperRequest()) {
+                    delayLabel = "IR";
+                } else if (sanction.getCard() == com.tonkar.volleyballreferee.engine.game.sanction.SanctionType.DELAY_WARNING) {
+                    delayLabel = "Delay Warning";
+                } else if (sanction.getCard() == com.tonkar.volleyballreferee.engine.game.sanction.SanctionType.DELAY_PENALTY) {
+                    delayLabel = "Delay Penalty";
+                }
+            }
+        } catch (Throwable ignored) {}
+        if (delayLabel != null && (score == null || score.isEmpty())) {
+            score = delayLabel;
+        } else if (delayLabel != null) {
+            score = delayLabel + " · " + score;
+        }
+        /*BADGE_INSERTED*/
+        
         sanctionDiv.appendChild(createCellSpan(score, false, false));
 
         return sanctionDiv;
+
+        // Rebuild score safely
+        score = String.format(
+                java.util.Locale.getDefault(),
+                "%d-%d",
+                teamType == com.tonkar.volleyballreferee.engine.team.TeamType.HOME ? sanction.getHomePoints() : sanction.getGuestPoints(),
+                teamType == com.tonkar.volleyballreferee.engine.team.TeamType.HOME ? sanction.getGuestPoints() : sanction.getHomePoints()
+        );
+        // Badge for delay family
+        delayLabel = null;
+        try {
+            if (sanction.getCard().isDelaySanctionType()) {
+                if (sanction.isImproperRequest()) {
+                    delayLabel = "IR";
+                } else if (sanction.getCard() == com.tonkar.volleyballreferee.engine.game.sanction.SanctionType.DELAY_WARNING) {
+                    delayLabel = "Delay Warning";
+                } else if (sanction.getCard() == com.tonkar.volleyballreferee.engine.game.sanction.SanctionType.DELAY_PENALTY) {
+                    delayLabel = "Delay Penalty";
+                }
+            }
+        } catch (Throwable ignored) {}
+        if (delayLabel != null && (score == null || score.isEmpty())) {
+            score = delayLabel;
+        } else if (delayLabel != null) {
+            score = delayLabel + " · " + score;
+        }
+        sanctionDiv.appendChild(createCellSpan(score, false, false));
+    
+
+
+        // Rebuild score safely
+        score = String.format(
+                java.util.Locale.getDefault(),
+                "%d-%d",
+                teamType == com.tonkar.volleyballreferee.engine.team.TeamType.HOME ? sanction.getHomePoints() : sanction.getGuestPoints(),
+                teamType == com.tonkar.volleyballreferee.engine.team.TeamType.HOME ? sanction.getGuestPoints() : sanction.getHomePoints()
+        );
+        // Badge for delay family
+        delayLabel = null;
+        try {
+            if (sanction.getCard().isDelaySanctionType()) {
+                if (sanction.isImproperRequest()) {
+                    delayLabel = "IR";
+                } else if (sanction.getCard() == com.tonkar.volleyballreferee.engine.game.sanction.SanctionType.DELAY_WARNING) {
+                    delayLabel = "Delay Warning";
+                } else if (sanction.getCard() == com.tonkar.volleyballreferee.engine.game.sanction.SanctionType.DELAY_PENALTY) {
+                    delayLabel = "Delay Penalty";
+                }
+            }
+        } catch (Throwable ignored) {}
+        if (delayLabel != null && (score == null || score.isEmpty())) {
+            score = delayLabel;
+        } else if (delayLabel != null) {
+            score = delayLabel + " · " + score;
+        }
+        sanctionDiv.appendChild(createCellSpan(score, false, false));
     }
 
     private String getSanctionImageClass(SanctionType sanctionType) {
@@ -1128,79 +1234,50 @@ public class ScoreSheetBuilder {
         return String.format("#%06X", (0xFFFFFF & color)).toLowerCase();
     }
     private Element createLicencesDiv() {
-        Element grid = new Element("div");
-        // Reutiliza tu grid 1-2-3 + espaciado existentes en el proyecto
-        grid.addClass("div-grid-1-2-3").addClass("spacing-before");
-    
-        // Caja con estilos inline para que se vea igual también en PDF
-        String boxStyle =
-                "border:1px solid #444;border-radius:6px;padding:6px 8px;"
-              + "min-height:52px;display:flex;flex-direction:column;justify-content:center;background:#fff;";
-    
-        // ---- Licence referee 1
-        Element b1 = new Element("div").attr("style", boxStyle);
-        b1.appendElement("div")
-          .attr("style","font-size:11px;font-weight:600;opacity:.75;margin-bottom:2px;")
-          .text(mContext.getString(R.string.licence_referee_1));
-        b1.appendElement("div")
-          .attr("style","font-size:13px;font-weight:700;letter-spacing:.2px;word-break:break-word;")
-          .text(safeText(mReferee1License));
-        grid.appendChild(b1);
-    
-        // ---- Licence referee 2
-        Element b2 = new Element("div").attr("style", boxStyle);
-        b2.appendElement("div")
-          .attr("style","font-size:11px;font-weight:600;opacity:.75;margin-bottom:2px;")
-          .text(mContext.getString(R.string.licence_referee_2));
-        b2.appendElement("div")
-          .attr("style","font-size:13px;font-weight:700;letter-spacing:.2px;word-break:break-word;")
-          .text(safeText(mReferee2License));
-        grid.appendChild(b2);
-    
-        // ---- Licence anotador
-        Element b3 = new Element("div").attr("style", boxStyle);
-        b3.appendElement("div")
-          .attr("style","font-size:11px;font-weight:600;opacity:.75;margin-bottom:2px;")
-          .text(mContext.getString(R.string.licence_scorer));
-        b3.appendElement("div")
-          .attr("style","font-size:13px;font-weight:700;letter-spacing:.2px;word-break:break-word;")
-          .text(safeText(mScorerLicense));
-        grid.appendChild(b3);
+        org.jsoup.nodes.Element row = new org.jsoup.nodes.Element("div");
+        row.attr("style", "display:flex;gap:8px;background:#eee;padding:8px;border:1px solid #ccc;border-radius:6px;margin-top:8px;");
 
-        // ---- Extra row: Assistant Coach & Staff (Home/Guest)
-        grid.appendElement("div").addClass("spacing-before");
-        Element rowExtra = new Element("div");
-        rowExtra.attr("style", "display:flex;gap:8px;flex-wrap:wrap;align-items:stretch;");
-        // Reuse same box style
-        // Asistant Coach (Home)
-        Element c1 = new Element("div").attr("style", boxStyle);
-        c1.appendElement("div").attr("style","font-size:11px;font-weight:600;opacity:.75;margin-bottom:2px;").text("Asistant Coach (Home)");
-        c1.appendElement("div").attr("style","font-size:13px;font-weight:700;letter-spacing:.2px;word-break:break-word;").text(safeText(mHomeCoachLicence));
-        rowExtra.appendChild(c1);
-        // Asistant Coach (Guest)
-        Element c2 = new Element("div").attr("style", boxStyle);
-        c2.appendElement("div").attr("style","font-size:11px;font-weight:600;opacity:.75;margin-bottom:2px;").text("Asistant Coach (Guest)");
-        c2.appendElement("div").attr("style","font-size:13px;font-weight:700;letter-spacing:.2px;word-break:break-word;").text(safeText(mGuestCoachLicence));
-        rowExtra.appendChild(c2);
-        // Staff (Home)
-        Element c3 = new Element("div").attr("style", boxStyle);
-        c3.appendElement("div").attr("style","font-size:11px;font-weight:600;opacity:.75;margin-bottom:2px;").text("Staff (Home)");
-        c3.appendElement("div").attr("style","font-size:13px;font-weight:700;letter-spacing:.2px;word-break:break-word;").text(safeText(mHomeStaffLicence));
-        rowExtra.appendChild(c3);
-        // Staff (Guest)
-        Element c4 = new Element("div").attr("style", boxStyle);
-        c4.appendElement("div").attr("style","font-size:11px;font-weight:600;opacity:.75;margin-bottom:2px;").text("Staff (Guest)");
-        c4.appendElement("div").attr("style","font-size:13px;font-weight:700;letter-spacing:.2px;word-break:break-word;").text(safeText(mGuestStaffLicence));
-        rowExtra.appendChild(c4);
-        grid.appendChild(rowExtra);
-    
-        return grid;
+        String ref1 = (mReferee1License != null && !mReferee1License.trim().isEmpty()) ? mReferee1License : "—";
+        String ref2 = (mReferee2License != null && !mReferee2License.trim().isEmpty()) ? mReferee2License : "—";
+        String scr  = (mScorerLicense  != null && !mScorerLicense.trim().isEmpty())  ? mScorerLicense  : "—";
+
+        org.jsoup.nodes.Element b1 = new org.jsoup.nodes.Element("div");
+        b1.attr("style", "flex:1;background:#eee;border:1px dashed #bbb;border-radius:6px;min-height:72px;padding:8px;");
+        b1.appendElement("div").attr("style","font-size:11px;color:#555;margin-bottom:4px;font-weight:600;")
+          .text(mContext.getString(R.string.licence_referee_1));
+        b1.appendElement("div").attr("style","font-size:13px;color:#222;word-break:break-word;")
+          .text(ref1);
+        row.appendChild(b1);
+
+        org.jsoup.nodes.Element b2 = new org.jsoup.nodes.Element("div");
+        b2.attr("style", "flex:1;background:#eee;border:1px dashed #bbb;border-radius:6px;min-height:72px;padding:8px;");
+        b2.appendElement("div").attr("style","font-size:11px;color:#555;margin-bottom:4px;font-weight:600;")
+          .text(mContext.getString(R.string.licence_referee_2));
+        b2.appendElement("div").attr("style","font-size:13px;color:#222;word-break:break-word;")
+          .text(ref2);
+        row.appendChild(b2);
+
+        org.jsoup.nodes.Element b3 = new org.jsoup.nodes.Element("div");
+        b3.attr("style", "flex:1;background:#eee;border:1px dashed #bbb;border-radius:6px;min-height:72px;padding:8px;");
+        b3.appendElement("div").attr("style","font-size:11px;color:#555;margin-bottom:4px;font-weight:600;")
+          .text(mContext.getString(R.string.licence_scorer));
+        b3.appendElement("div").attr("style","font-size:13px;color:#222;word-break:break-word;")
+          .text(scr);
+        row.appendChild(b3);
+
+        return row;
     }
     private Element createLicencesCard() {
-    Element card = new Element("div");
-    card.addClass("div-card").addClass("spacing-before");
-    card.appendChild(createLicencesDiv());
-    return card;
+        org.jsoup.nodes.Element card = new org.jsoup.nodes.Element("div");
+        card.attr("style","margin-top:8px;margin-bottom:8px;padding:8px;border:1px solid #ccc;border-radius:6px;background:#fff;");
+        // Título
+        card.appendElement("div")
+            .attr("style","font-weight:700;margin-bottom:6px;")
+            .text(mContext.getString(R.string.licences));
+        // Bloques en nuevo formato
+        card.appendChild(createLicencesDiv());
+        card.appendChild(createTechnicalStaffDiv());
+        return card;
     }
     private String getIrLabel(com.tonkar.volleyballreferee.engine.api.model.SanctionDto s) {
         try {
@@ -1313,4 +1390,36 @@ public class ScoreSheetBuilder {
             + "</html>\n";
     }
 
+
+    
+    private org.jsoup.nodes.Element createTechnicalStaffDiv() {
+        org.jsoup.nodes.Element block = new org.jsoup.nodes.Element("div");
+        block.attr("style", "margin-top:8px;padding:8px;border:1px solid #ccc;border-radius:6px;background:#f6f6f6;");
+        block.appendElement("div").attr("style","font-weight:700;margin-bottom:6px;").text(mContext.getString(R.string.technical_staff));
+
+        org.jsoup.nodes.Element row = new org.jsoup.nodes.Element("div");
+        row.attr("style", "display:flex;gap:8px;flex-wrap:wrap;");
+
+        String acHome  = (mHomeCoachLicence  != null && !mHomeCoachLicence.trim().isEmpty())  ? mHomeCoachLicence  : "—";
+        String acGuest = (mGuestCoachLicence != null && !mGuestCoachLicence.trim().isEmpty()) ? mGuestCoachLicence : "—";
+        String stHome  = (mHomeStaffLicence  != null && !mHomeStaffLicence.trim().isEmpty())  ? mHomeStaffLicence  : "—";
+        String stGuest = (mGuestStaffLicence != null && !mGuestStaffLicence.trim().isEmpty()) ? mGuestStaffLicence : "—";
+
+        row.appendChild(makeStaffBox(mContext.getString(R.string.assistant_coach) + " (Home)",  acHome));
+        row.appendChild(makeStaffBox(mContext.getString(R.string.assistant_coach) + " (Guest)", acGuest));
+        row.appendChild(makeStaffBox(mContext.getString(R.string.staff) + " (Home)",  stHome));
+        row.appendChild(makeStaffBox(mContext.getString(R.string.staff) + " (Guest)", stGuest));
+
+        block.appendChild(row);
+        return block;
+    }
+
+    private org.jsoup.nodes.Element makeStaffBox(String label, String value) {
+        org.jsoup.nodes.Element box = new org.jsoup.nodes.Element("div");
+        box.attr("style","flex:1 1 48%;border:1px dashed #bbb;border-radius:6px;background:#fff;padding:8px;min-height:64px;");
+        box.appendElement("div").attr("style","font-size:11px;color:#555;margin-bottom:4px;font-weight:600;").text(label);
+        box.appendElement("div").attr("style","font-size:13px;color:#222;word-break:break-word;").text(value);
+        return box;
+    }
+    
 }

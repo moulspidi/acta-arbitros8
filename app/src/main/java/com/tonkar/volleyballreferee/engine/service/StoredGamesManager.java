@@ -337,60 +337,6 @@ public class StoredGamesManager implements StoredGamesService, ScoreListener, Te
             mStoredGame.setScore(mGame.getScore());
             mStoredGame.setStartTime(mGame.getStartTime());
             mStoredGame.setEndTime(mGame.getEndTime());
-            // TEAMSYNC PATCH (v3): keep team/league/rules in sync while match is live
-            if (mGame.getLeague() != null && mGame.getKind().equals(mGame.getLeague().getKind())
-                    && mGame.getLeague().getName().length() > 1 && mGame.getLeague().getDivision().length() > 1) {
-                SelectedLeagueDto league = new SelectedLeagueDto();
-                league.setAll(mGame.getLeague());
-                mStoredGame.setLeague(league);
-            } else {
-                mStoredGame.setLeague(null);
-            }
-            mStoredGame.setRules(mGame.getRules());
-
-            // HOME
-            {
-                TeamDto t = mStoredGame.getTeam(TeamType.HOME);
-                t.setId(mGame.getTeamId(TeamType.HOME));
-                t.setCreatedBy(mGame.getCreatedBy(TeamType.HOME));
-                t.setCreatedAt(mGame.getCreatedAt(TeamType.HOME));
-                t.setUpdatedAt(mGame.getUpdatedAt(TeamType.HOME));
-                t.setKind(mGame.getTeamsKind());
-                t.setGender(mGame.getGender(TeamType.HOME));
-                t.setName(mGame.getTeamName(TeamType.HOME));
-                t.setColorInt(mGame.getTeamColor(TeamType.HOME));
-                t.setLiberoColorInt(mGame.getLiberoColor(TeamType.HOME));
-                t.setCaptain(mGame.getCaptain(TeamType.HOME));
-                t.setCoach(mGame.getCoachName(TeamType.HOME));
-                t.getPlayers().clear();
-                t.getLiberos().clear();
-                for (PlayerDto p : mGame.getPlayers(TeamType.HOME)) {
-                    if (mGame.isLibero(TeamType.HOME, p.getNum())) t.getLiberos().add(p);
-                    else t.getPlayers().add(p);
-                }
-            }
-            // GUEST
-            {
-                TeamDto t = mStoredGame.getTeam(TeamType.GUEST);
-                t.setId(mGame.getTeamId(TeamType.GUEST));
-                t.setCreatedBy(mGame.getCreatedBy(TeamType.GUEST));
-                t.setCreatedAt(mGame.getCreatedAt(TeamType.GUEST));
-                t.setUpdatedAt(mGame.getUpdatedAt(TeamType.GUEST));
-                t.setKind(mGame.getTeamsKind());
-                t.setGender(mGame.getGender(TeamType.GUEST));
-                t.setName(mGame.getTeamName(TeamType.GUEST));
-                t.setColorInt(mGame.getTeamColor(TeamType.GUEST));
-                t.setLiberoColorInt(mGame.getLiberoColor(TeamType.GUEST));
-                t.setCaptain(mGame.getCaptain(TeamType.GUEST));
-                t.setCoach(mGame.getCoachName(TeamType.GUEST));
-                t.getPlayers().clear();
-                t.getLiberos().clear();
-                for (PlayerDto p : mGame.getPlayers(TeamType.GUEST)) {
-                    if (mGame.isLibero(TeamType.GUEST, p.getNum())) t.getLiberos().add(p);
-                    else t.getPlayers().add(p);
-                }
-            }
-
 
             mStoredGame.getSets().clear();
 
@@ -463,7 +409,22 @@ public class StoredGamesManager implements StoredGamesService, ScoreListener, Te
                 mStoredGame.getSets().add(set);
             }
 
-            mStoredGame.getAllSanctions(TeamType.HOME).clear();
+            
+
+            // Prune a trailing empty set to avoid shifting the 'current' set index.
+            int lastIndex = mStoredGame.getNumberOfSets() - 1;
+            if (lastIndex > 0) {
+                boolean noPoints = mStoredGame.getPoints(TeamType.HOME, lastIndex) == 0
+                        && mStoredGame.getPoints(TeamType.GUEST, lastIndex) == 0;
+                boolean noSubs = mStoredGame.getSubstitutions(TeamType.HOME, lastIndex).isEmpty()
+                        && mStoredGame.getSubstitutions(TeamType.GUEST, lastIndex).isEmpty();
+                boolean noLineup = !mStoredGame.isStartingLineupConfirmed(TeamType.HOME, lastIndex)
+                        && !mStoredGame.isStartingLineupConfirmed(TeamType.GUEST, lastIndex);
+                if (noPoints && noSubs && noLineup) {
+                    mStoredGame.getSets().remove(lastIndex);
+                }
+            }
+mStoredGame.getAllSanctions(TeamType.HOME).clear();
 
             for (SanctionDto sanction : mGame.getAllSanctions(TeamType.HOME)) {
                 mStoredGame

@@ -350,4 +350,8 @@
     <string name="improper_request_ir">Solicitud improcedente (IR)</string>
     <string name="improper_request_recorded">Solicitud improcedente registrada: %1$s</string>
     <string name="improper_request">Solicitud improcedente</string>
+    <string name="assistant_coach">Entrenador asistente</string>
+    <string name="staff">Staff</string>
+    <string name="technical_staff">Staff técnico</string>
+    <string name="licences">Licencias</string>
 </resources>
