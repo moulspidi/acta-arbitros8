@@ -1372,7 +1372,7 @@ public abstract class Game extends BaseGame {
 
     public com.tonkar.volleyballreferee.engine.api.model.SanctionDto getLastSanction(TeamType team) {
         java.util.List<com.tonkar.volleyballreferee.engine.api.model.SanctionDto> list =
-                (team == TeamType.HOME) ? mHomeTeamSanctions : mGuestTeamSanctions;
+                (team == TeamType.HOME) ? mHomeSanctions : mGuestSanctions;
         if (list != null && !list.isEmpty()) return list.get(list.size() - 1);
         return null;
     }

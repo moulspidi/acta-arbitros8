@@ -3,8 +3,12 @@ package com.tonkar.volleyballreferee.engine.api.model;
 import com.google.gson.annotations.SerializedName;
 import com.tonkar.volleyballreferee.engine.game.sanction.SanctionType;
 
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-import lombok.*;
 /**
  * Sanction DTO (retrocompatible)
  * - Mantiene helpers estáticos e instancia: isPlayer/isCoach/isTeam
@@ -12,7 +16,7 @@ import lombok.*;
  * - Ctor 6-args (Lombok) y ctor 5-args legacy
  */
 @NoArgsConstructor
-@NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
 @EqualsAndHashCode
@@ -38,8 +42,8 @@ public class SanctionDto {
 
     /** Legacy ctor (sin IR) para compatibilidad con llamadas existentes */
     public SanctionDto(SanctionType card, int num, int set, int homePoints, int guestPoints) {
-    this(card, num, set, homePoints, guestPoints, false);
-}
+        this(card, num, set, homePoints, guestPoints, false);
+    }
 
     // ---- Helpers estáticos usados por motor y UI ----
     public static boolean isCoach(int num) { return num == COACH; }
@@ -58,11 +62,7 @@ public class SanctionDto {
     public void setImproperRequest(boolean improperRequest) { this.improperRequest = improperRequest; }
 
     public SanctionDto(SanctionType card, int num, int set, int homePoints, int guestPoints, boolean improperRequest) {
-    this.card = card;
-    this.num = num;
-    this.set = set;
-    this.homePoints = homePoints;
-    this.guestPoints = guestPoints;
-    this.improperRequest = improperRequest;
-}
+        this(card, num, set, homePoints, guestPoints);
+        this.improperRequest = improperRequest;
+    }
 }
