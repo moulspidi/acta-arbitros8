@@ -594,12 +594,7 @@ String displayName = getSanctionDisplayName(sanction);
 int numVal = 0;
 try { numVal = sanction.getNum(); } catch (Throwable ignored) {}
 String who = null;
-try {
-    int teamConst = com.tonkar.volleyballreferee.engine.api.model.PlayerDto.TEAM;
-    who = (numVal == teamConst || numVal <= 0) ? "TEAM" : String.valueOf(numVal);
-} catch (Throwable ignored) {
-    who = (numVal <= 0) ? "TEAM" : String.valueOf(numVal);
-}
+who = (numVal <= 0) ? "TEAM" : String.valueOf(numVal);
 String labelText = String.format("%s — %s — %s", displayName, who, score);
 sanctionDiv.appendChild(createCellSpan(labelText, false, false));
 return sanctionDiv;
