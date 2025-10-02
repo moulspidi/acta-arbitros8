@@ -252,4 +252,11 @@ public class StoredGamesManager implements StoredGamesService, ScoreListener, Te
         try { if (game != null) { this.mGame = game; } } catch (Throwable ignored) {}
     }
     
+
+    @Override
+    public IGame loadSetupGame() {
+        // Local-only implementation: devolver la referencia actual si existe
+        try { return mGame; } catch (Throwable ignored) { return null; }
+    }
+    
 }
