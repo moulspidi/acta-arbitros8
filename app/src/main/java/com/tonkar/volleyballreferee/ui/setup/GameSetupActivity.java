@@ -102,7 +102,7 @@ public class GameSetupActivity extends AppCompatActivity {
                 }
             }
                         ((StoredGamesManager)storedGamesService).applySetupLineupToFirstSet();
-            ((StoredGamesManager) storedGamesService).unlockStartingLineupForFirstSet();
+            storedGamesService.saveCurrentGame(true);
             ((StoredGamesManager) storedGamesService).applySetupLineupToFirstSet();
             storedGamesService.saveCurrentGame(true);
         } else {
