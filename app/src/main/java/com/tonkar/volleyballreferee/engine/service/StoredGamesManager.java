@@ -148,12 +148,12 @@ public class StoredGamesManager implements StoredGamesService, ScoreListener, Te
         for (com.tonkar.volleyballreferee.engine.team.TeamType team : com.tonkar.volleyballreferee.engine.team.TeamType.values()) {
             try {
                 java.util.Set<Integer> current = new java.util.TreeSet<>();
-                for (Integer n : mGame.getPlayers(team)) { if (n != null && n > 0) current.add(n); }
+                for (com.tonkar.volleyballreferee.engine.api.model.PlayerDto p : mGame.getPlayers(team)) { if (p != null && p.getNumber() > 0) current.add(p.getNumber()); }
 
                 java.util.Set<Integer> desired = new java.util.TreeSet<>();
                 try {
                     // Preferred: read from mGame team definitions saved by setup UI
-                    for (Integer n : mGame.getPlayers(team)) { if (n != null && n > 0) desired.add(n); }
+                    for (com.tonkar.volleyballreferee.engine.api.model.PlayerDto p : mGame.getPlayers(team)) { if (p != null && p.getNumber() > 0) desired.add(p.getNumber()); }
                 } catch (Throwable ignored) {}
 
                 // If nothing in desired, do nothing
@@ -177,4 +177,36 @@ public class StoredGamesManager implements StoredGamesService, ScoreListener, Te
 }
 
 
+
+    public void syncGames() {
+        /* No-op sync in local-only variant */
+    }
+
+    public void cancelGame(String id, DataSynchronizationListener listener) {
+        /* No-op cancel in local-only variant */ if (listener != null) listener.onSuccess();
+    }
+
+    public boolean hasSetupGame() {
+        return false;
+    }
+
+    public void deleteSetupGame() {
+        /* no-op */
+    }
+
+    private void createCurrentGame() {
+        /* overload calls typed version if available */ try { createCurrentGame(mGame); } catch (Throwable ignored) {}
+    }
+
+    private void pushCurrentGameToServer() {
+        /* no-op server sync */
+    }
+
+    private void deleteGameOnServer(String id) {
+        /* no-op server delete */
+    }
+
+    private void updateCurrentGame() {
+        /* no-op update */
+    }
 }

@@ -134,9 +134,9 @@ public class GameSetupActivity extends AppCompatActivity {
     public void applyChangesAndReturn(View view) {
     try {
         // Persist teams/rules/league from UI into mGame
-        saveTeams(mGame);
-        saveRules(mGame);
-        saveLeague(mGame);
+        saveTeams();
+        saveRules();
+        saveLeague();
 
         // Mark updated
         mGame.setUpdatedAt(System.currentTimeMillis());
@@ -145,7 +145,7 @@ public class GameSetupActivity extends AppCompatActivity {
         StoredGamesService storedGamesService = new StoredGamesManager(this);
         storedGamesService.connectGameRecorder(mGame);
 
-        try { storedGamesService.applySetupLineupToFirstSet(); } catch (Throwable ignored) {}
+        try { ((StoredGamesManager) storedGamesService).applySetupLineupToFirstSet(); } catch (Throwable ignored) {}
 
         storedGamesService.saveCurrentGame(true);
     } catch (Throwable ignored) {}
