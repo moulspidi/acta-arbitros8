@@ -94,8 +94,7 @@ public class GameActivity extends AppCompatActivity
         } catch (Throwable ignored) {}
         try {
             if (mGame == null) {
-                mGame = new com.tonkar.volleyballreferee.engine.game.indoor.IndoorGame();
-            }
+}
         } catch (Throwable ignored) {}
         
         preSignCoaches = getIntent().getBooleanExtra("pre_sign_coaches", false);

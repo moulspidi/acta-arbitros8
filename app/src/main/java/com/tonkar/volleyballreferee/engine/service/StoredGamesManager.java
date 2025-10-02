@@ -369,16 +369,11 @@ public class StoredGamesManager implements StoredGamesService, ScoreListener, Te
 
 
     // --- Defensive init to avoid NPEs when opening Indoor 6x6 before lineup submission
-    private void ensureInitializedForIndoor() {
-        try {
-            if (mGame == null) {
-                mGame = new com.tonkar.volleyballreferee.engine.game.indoor.IndoorGame();
-            }
+    private void ensureInitializedForIndoor() { /* no-op for this variant */ }
         } catch (Throwable ignored) {}
         try {
             if (mStoredGame == null) {
-                mStoredGame = new com.tonkar.volleyballreferee.engine.api.model.StoredGame();
-                try { mStoredGame.setKind(com.tonkar.volleyballreferee.engine.game.GameType.INDOOR); } catch (Throwable ignored2) {}
+try { mStoredGame.setKind(com.tonkar.volleyballreferee.engine.game.GameType.INDOOR); } catch (Throwable ignored2) {}
             }
         } catch (Throwable ignored) {}
         try {
