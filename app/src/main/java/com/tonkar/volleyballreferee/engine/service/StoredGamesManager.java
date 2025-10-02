@@ -245,4 +245,11 @@ public class StoredGamesManager implements StoredGamesService, ScoreListener, Te
         }
     }
     
+
+    @Override
+    public void saveSetupGame(IGame game) {
+        // Local-only variant: persist nothing here; keep reference if available
+        try { if (game != null) { this.mGame = game; } } catch (Throwable ignored) {}
+    }
+    
 }
