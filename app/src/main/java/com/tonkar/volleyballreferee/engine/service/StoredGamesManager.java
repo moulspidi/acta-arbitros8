@@ -267,4 +267,11 @@ public class StoredGamesManager implements StoredGamesService, ScoreListener, Te
         try { mGame = null; } catch (Throwable ignored) {}
     }
     
+
+    @Override
+    public void onMatchCompleted(TeamType winner) {
+        // No-op for local variant; clear and persist nothing
+        try { /* optionally clear current game */ } catch (Throwable ignored) {}
+    }
+    
 }
