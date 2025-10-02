@@ -1316,7 +1316,6 @@ return sanctionDiv;
     
 
     // === Helpers añadidos ===
-    private 
     // Human-readable display name for sanctions (English labels with abbreviations)
     private String getSanctionDisplayName(com.tonkar.volleyballreferee.engine.api.model.SanctionDto sanction) {
         try {
