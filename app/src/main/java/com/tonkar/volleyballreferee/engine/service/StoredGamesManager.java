@@ -830,10 +830,7 @@ mStoredGame.getAllSanctions(TeamType.HOME).clear();
         }
     }
 
-    public void unlockStartingLineupForFirstSet() {
-        try {
-            final int setIndex = 0;
-            try { mStoredGame.setStartingLineupSubmitted(TeamType.HOME, setIndex, false); } catch (Throwable ignored) {}
+    public void unlockStartingLineupForFirstSet() { /* no-op: no submission flag in this variant */ } catch (Throwable ignored) {}
             try { mStoredGame.setStartingLineupSubmitted(TeamType.GUEST, setIndex, false); } catch (Throwable ignored) {}
         } catch (Throwable ignored) {}
     }
