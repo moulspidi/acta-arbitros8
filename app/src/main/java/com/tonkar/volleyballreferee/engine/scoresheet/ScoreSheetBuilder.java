@@ -1,5 +1,8 @@
 package com.tonkar.volleyballreferee.engine.scoresheet;
 
+import com.tonkar.volleyballreferee.engine.api.model.SanctionDto;
+import com.tonkar.volleyballreferee.engine.game.sanction.SanctionType;
+
 import org.jsoup.nodes.Element;
 import android.content.Context;
 import android.graphics.*;
@@ -1386,7 +1389,7 @@ String getSanctionImageClass(SanctionType card) {
             SanctionType t = s.getCard();
             if (t == null) return "";
     
-            // IR y Delay diferenciados, nombres en inglés abreviados/claros
+            // Nombres en inglés claros y sin duplicar dorsal
             if (t == SanctionType.IMPROPER_REQUEST_WARNING) return "IR Warning";
             if (t == SanctionType.IMPROPER_REQUEST_PENALTY) return "IR Penalty";
             if (t == SanctionType.DELAY_WARNING)            return "Delay Warning";
