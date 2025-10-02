@@ -588,8 +588,22 @@ public class ScoreSheetBuilder {
             score = delayLabel + " · " + score;
         }
 
-        sanctionDiv.appendChild(createCellSpan(score, false, false));
-        return sanctionDiv;
+        
+// Compose a rich label: DisplayName — WHO — SCORE
+String displayName = getSanctionDisplayName(sanction);
+int numVal = 0;
+try { numVal = sanction.getNum(); } catch (Throwable ignored) {}
+String who = null;
+try {
+    int teamConst = com.tonkar.volleyballreferee.engine.api.model.PlayerDto.TEAM;
+    who = (numVal == teamConst || numVal <= 0) ? "TEAM" : String.valueOf(numVal);
+} catch (Throwable ignored) {
+    who = (numVal <= 0) ? "TEAM" : String.valueOf(numVal);
+}
+String labelText = String.format("%s — %s — %s", displayName, who, score);
+sanctionDiv.appendChild(createCellSpan(labelText, false, false));
+return sanctionDiv;
+
 }private Element createLadderItem(TeamType teamType, int score) {
         Element ladderItemDiv = new Element("div");
         ladderItemDiv.addClass("div-flex-column").addClass("ladder-spacing");
@@ -1302,7 +1316,32 @@ public class ScoreSheetBuilder {
     
 
     // === Helpers añadidos ===
-    private String getSanctionImageClass(SanctionType card) {
+    private 
+    // Human-readable display name for sanctions (English labels with abbreviations)
+    private String getSanctionDisplayName(com.tonkar.volleyballreferee.engine.api.model.SanctionDto sanction) {
+        try {
+            if (sanction != null) {
+                try {
+                    if (sanction.isImproperRequest()) {
+                        return "Improper Request (IR)";
+                    }
+                } catch (Throwable ignored) {}
+                com.tonkar.volleyballreferee.engine.game.sanction.SanctionType t = sanction.getCard();
+                if (t == null) return "Sanction";
+                switch (t) {
+                    case YELLOW: return "Yellow Card";
+                    case RED: return "Red Card (Penalty)";
+                    case RED_EXPULSION: return "Expulsion";
+                    case RED_DISQUALIFICATION: return "Disqualification";
+                    case DELAY_WARNING: return "Delay Warning";
+                    case DELAY_PENALTY: return "Delay Penalty (Point)";
+                    default: return t.name();
+                }
+            }
+        } catch (Throwable ignored) { }
+        return "Sanction";
+    }
+String getSanctionImageClass(SanctionType card) {
         if (card == null) return "yellow-card-image";
         switch (card) {
             case YELLOW: return "yellow-card-image";

@@ -173,15 +173,8 @@ public class GameSetupActivity extends AppCompatActivity {
             saveLeague();
             mGame.startMatch();
             StoredGamesService storedGamesService = new StoredGamesManager(this);
-            
-storedGamesService.createCurrentGame(mGame);
-            
-            // Ensure setup lineup is applied to Set 1 (index 0) before entering GameActivity
-            try {
-                ((com.tonkar.volleyballreferee.engine.service.StoredGamesManager) storedGamesService).applySetupLineupToFirstSet();
-                ((com.tonkar.volleyballreferee.engine.service.StoredGamesManager) storedGamesService).saveCurrentGame(true);
-            } catch (Throwable ignored) {}
-Log.i(Tags.SETUP_UI, "Start game activity");
+            storedGamesService.createCurrentGame(mGame);
+            Log.i(Tags.SETUP_UI, "Start game activity");
             final Intent gameIntent = new Intent(GameSetupActivity.this, GameActivity.class);
             gameIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             gameIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
