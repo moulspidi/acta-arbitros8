@@ -148,12 +148,12 @@ public class StoredGamesManager implements StoredGamesService, ScoreListener, Te
         for (com.tonkar.volleyballreferee.engine.team.TeamType team : com.tonkar.volleyballreferee.engine.team.TeamType.values()) {
             try {
                 java.util.Set<Integer> current = new java.util.TreeSet<>();
-                for (com.tonkar.volleyballreferee.engine.api.model.PlayerDto p : mGame.getPlayers(team)) { if (p != null && p.getNumber() > 0) current.add(p.getNumber()); }
+                for (com.tonkar.volleyballreferee.engine.api.model.PlayerDto p : mGame.getPlayers(team)) { if (p != null && p.getNum() > 0) current.add(p.getNum()); }
 
                 java.util.Set<Integer> desired = new java.util.TreeSet<>();
                 try {
                     // Preferred: read from mGame team definitions saved by setup UI
-                    for (com.tonkar.volleyballreferee.engine.api.model.PlayerDto p : mGame.getPlayers(team)) { if (p != null && p.getNumber() > 0) desired.add(p.getNumber()); }
+                    for (com.tonkar.volleyballreferee.engine.api.model.PlayerDto p : mGame.getPlayers(team)) { if (p != null && p.getNum() > 0) desired.add(p.getNum()); }
                 } catch (Throwable ignored) {}
 
                 // If nothing in desired, do nothing
@@ -183,7 +183,7 @@ public class StoredGamesManager implements StoredGamesService, ScoreListener, Te
     }
 
     public void cancelGame(String id, DataSynchronizationListener listener) {
-        /* No-op cancel in local-only variant */ if (listener != null) listener.onSuccess();
+        /* No-op cancel in local-only variant */ if (listener != null) listener.onSynchronizationSucceeded();
     }
 
     public boolean hasSetupGame() {
@@ -209,4 +209,11 @@ public class StoredGamesManager implements StoredGamesService, ScoreListener, Te
     private void updateCurrentGame() {
         /* no-op update */
     }
+
+    @Override
+    public void scheduleGame(GameSummaryDto gameDescription, boolean create, DataSynchronizationListener listener) {
+        // No-op scheduling in this local variant
+        if (listener != null) listener.onSynchronizationSucceeded();
+    }
+    
 }
