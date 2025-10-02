@@ -569,15 +569,15 @@ public class ScoreSheetBuilder {
         );
 
         // Badge textual para la familia de demora
-        String delayLabel = getSanctionDisplayName(sanction);
+        String delayLabel = null;
         try {
             if (sanction.getCard().isDelaySanctionType()) {
                 if (sanction.isImproperRequest()) {
-                    delayLabel = getSanctionDisplayName(sanction);
+                    delayLabel = "IR";
                 } else if (sanction.getCard() == com.tonkar.volleyballreferee.engine.game.sanction.SanctionType.DELAY_WARNING) {
-                    delayLabel = getSanctionDisplayName(sanction);
+                    delayLabel = "Delay Warning";
                 } else if (sanction.getCard() == com.tonkar.volleyballreferee.engine.game.sanction.SanctionType.DELAY_PENALTY) {
-                    delayLabel = getSanctionDisplayName(sanction);
+                    delayLabel = "Delay Penalty";
                 }
             }
         } catch (Throwable ignored) { }
@@ -588,8 +588,17 @@ public class ScoreSheetBuilder {
             score = delayLabel + " · " + score;
         }
 
-        sanctionDiv.appendChild(createCellSpan(score, false, false));
-        return sanctionDiv;
+        
+// Compose a rich label: DisplayName — WHO — SCORE
+String displayName = getSanctionDisplayName(sanction);
+int numVal = 0;
+try { numVal = sanction.getNum(); } catch (Throwable ignored) {}
+String who = null;
+who = (numVal <= 0) ? "TEAM" : String.valueOf(numVal);
+String labelText = String.format("%s — %s", displayName, score);  // removed player number duplicate
+sanctionDiv.appendChild(createCellSpan(labelText, false, false));
+return sanctionDiv;
+
 }private Element createLadderItem(TeamType teamType, int score) {
         Element ladderItemDiv = new Element("div");
         ladderItemDiv.addClass("div-flex-column").addClass("ladder-spacing");
@@ -1302,7 +1311,31 @@ public class ScoreSheetBuilder {
     
 
     // === Helpers añadidos ===
-    private String getSanctionImageClass(SanctionType card) {
+    // Human-readable display name for sanctions (English labels with abbreviations)
+    private String getSanctionDisplayName(com.tonkar.volleyballreferee.engine.api.model.SanctionDto sanction) {
+        try {
+            if (sanction != null) {
+                try {
+                    if (sanction.isImproperRequest()) {
+                        return "Improper Request (IR)";
+                    }
+                } catch (Throwable ignored) {}
+                com.tonkar.volleyballreferee.engine.game.sanction.SanctionType t = sanction.getCard();
+                if (t == null) return "Sanction";
+                switch (t) {
+                    case YELLOW: return "Yellow Card";
+                    case RED: return "Red Card (Penalty)";
+                    case RED_EXPULSION: return "Expulsion";
+                    case RED_DISQUALIFICATION: return "Disqualification";
+                    case DELAY_WARNING: return "Delay Warning";
+                    case DELAY_PENALTY: return "Delay Penalty (Point)";
+                    default: return t.name();
+                }
+            }
+        } catch (Throwable ignored) { }
+        return "Sanction";
+    }
+String getSanctionImageClass(SanctionType card) {
         if (card == null) return "yellow-card-image";
         switch (card) {
             case YELLOW: return "yellow-card-image";
@@ -1341,40 +1374,4 @@ public class ScoreSheetBuilder {
         wrapperDiv.appendChild(ladderDiv);
         return wrapperDiv;
     }
-    
-    // === Sanction display mapping (robust across enum packages) ===
-    private String getSanctionDisplayName(com.tonkar.volleyballreferee.engine.api.model.SanctionDto s) {
-        if (s == null || s.getCard() == null) return "";
-        final String cardName = s.getCard().name(); // e.g., DELAY_WARNING, IMPROPER_REQUEST_WARNING
-
-        // Improper Request (IR) explicit
-        if ("IMPROPER_REQUEST_WARNING".equals(cardName) || "IMPROPER_REQUEST".equals(cardName)) return "IR Warning";
-        if ("IMPROPER_REQUEST_PENALTY".equals(cardName)) return "IR Penalty";
-
-        // If it looks like Delay but text suggests IR, treat as IR
-        String blob = "";
-        try { blob += " " + String.valueOf(s.getReason()); } catch (Throwable ignored) {}
-        try { blob += " " + String.valueOf(s.getComment()); } catch (Throwable ignored) {}
-        try { blob += " " + String.valueOf(s.getDetails()); } catch (Throwable ignored) {}
-        final String U = blob.toUpperCase();
-        if (("DELAY_WARNING".equals(cardName) || "DELAY_PENALTY".equals(cardName)) && U.contains("IR")) {
-            return "IR Warning";
-        }
-
-        // Delay
-        if ("DELAY_WARNING".equals(cardName)) return "Delay Warning";
-        if ("DELAY_PENALTY".equals(cardName)) return "Delay Penalty";
-
-        // Cards
-        if ("YELLOW".equals(cardName) || "YELLOW_CARD".equals(cardName)) return "Yellow Card";
-        if ("RED_DISQUALIFICATION".equals(cardName) || "DISQUALIFICATION".equals(cardName)) return "Disqualification";
-        if ("RED_EXPULSION".equals(cardName) || "EXPULSION".equals(cardName)) return "Expulsion";
-        if ("RED".equals(cardName) || "RED_CARD".equals(cardName) || "PENALTY".equals(cardName)) return "Red Card (Penalty)";
-
-        // Fallback: prettify enum name
-        String pretty = cardName.toLowerCase().replace('_', ' ');
-        pretty = Character.toUpperCase(pretty.charAt(0)) + pretty.substring(1);
-        return pretty;
     }
-
-}
