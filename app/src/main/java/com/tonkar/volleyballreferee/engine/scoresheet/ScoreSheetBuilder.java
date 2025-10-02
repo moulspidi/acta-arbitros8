@@ -1271,7 +1271,7 @@ return sanctionDiv;
         + "      .border { border:1px solid " + colorIntToHtml(ContextCompat.getColor(mContext, R.color.colorOnScoreSheetBackground)) + "; "
         + "                margin-right:-1px; margin-left:-1px; }\n"
         + "      .new-page-for-printers { break-before: page; }\n"
-        + "      .sanctions-section { grid-column: 1 / -1; width: 100%; clear: both; }\n"
+        + "      .sanctions-section{grid-column:1/-1;width:100%;clear:both;}\n"
         + "    </style>\n"
         + "    <style type=\"text/css\" media=\"print\"> body { -webkit-print-color-adjust: exact; } </style>\n"
         + "  </head>\n"
@@ -1380,17 +1380,26 @@ String getSanctionImageClass(SanctionType card) {
     }
 
     // Friendly label for sanctions (no jersey repeat; IR shown correctly)
-    private String getSanctionDisplayName(com.tonkar.volleyballreferee.engine.api.model.SanctionDto s) {
+    private String getSanctionDisplayName(SanctionDto s) {
+        if (s == null) return "";
         try {
-            com.tonkar.volleyballreferee.engine.game.sanction.SanctionType t = s.getCard();
-            if (t == com.tonkar.volleyballreferee.engine.game.sanction.SanctionType.IMPROPER_REQUEST_WARNING) return "IR Warning";
-            if (t == com.tonkar.volleyballreferee.engine.game.sanction.SanctionType.IMPROPER_REQUEST_PENALTY) return "IR Penalty";
-            if (t == com.tonkar.volleyballreferee.engine.game.sanction.SanctionType.DELAY_WARNING) return "Delay Warning";
-            if (t == com.tonkar.volleyballreferee.engine.game.sanction.SanctionType.DELAY_PENALTY) return "Delay Penalty";
-            if (t == com.tonkar.volleyballreferee.engine.game.sanction.SanctionType.YELLOW_CARD) return "Yellow Card";
-            if (t == com.tonkar.volleyballreferee.engine.game.sanction.SanctionType.RED_CARD) return "Red Card";
-            if (t == com.tonkar.volleyballreferee.engine.game.sanction.SanctionType.EXPULSION) return "Expulsion";
-            if (t == com.tonkar.volleyballreferee.engine.game.sanction.SanctionType.DISQUALIFICATION) return "Disqualification";
-        } catch (Throwable ignored) {}
-        return "Sanction";
+            SanctionType t = s.getCard();
+            if (t == null) return "";
+    
+            // IR y Delay diferenciados, nombres en inglés abreviados/claros
+            if (t == SanctionType.IMPROPER_REQUEST_WARNING) return "IR Warning";
+            if (t == SanctionType.IMPROPER_REQUEST_PENALTY) return "IR Penalty";
+            if (t == SanctionType.DELAY_WARNING)            return "Delay Warning";
+            if (t == SanctionType.DELAY_PENALTY)            return "Delay Penalty";
+            if (t == SanctionType.YELLOW_CARD)              return "Yellow Card";
+            if (t == SanctionType.RED_CARD)                 return "Red Card";
+            if (t == SanctionType.EXPULSION)                return "Expulsion";
+            if (t == SanctionType.DISQUALIFICATION)         return "Disqualification";
+    
+            // Fallback legible
+            String pretty = t.name().toLowerCase().replace('_', ' ');
+            return Character.toUpperCase(pretty.charAt(0)) + pretty.substring(1);
+        } catch (Throwable ignored) {
+            return "";
+        }
     }
