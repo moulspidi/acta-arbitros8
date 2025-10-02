@@ -829,4 +829,13 @@ mStoredGame.getAllSanctions(TeamType.HOME).clear();
             });
         }
     }
+
+    public void unlockStartingLineupForFirstSet() {
+        try {
+            final int setIndex = 0;
+            try { mStoredGame.setStartingLineupSubmitted(TeamType.HOME, setIndex, false); } catch (Throwable ignored) {}
+            try { mStoredGame.setStartingLineupSubmitted(TeamType.GUEST, setIndex, false); } catch (Throwable ignored) {}
+        } catch (Throwable ignored) {}
+    }
+    
 }
