@@ -830,9 +830,8 @@ mStoredGame.getAllSanctions(TeamType.HOME).clear();
         }
     }
 
-    public void unlockStartingLineupForFirstSet() { /* no-op: no submission flag in this variant */ } catch (Throwable ignored) {}
-            try { mStoredGame.setStartingLineupSubmitted(TeamType.GUEST, setIndex, false); } catch (Throwable ignored) {}
-        } catch (Throwable ignored) {}
-    }
-    
+public void unlockStartingLineupForFirstSet() {
+    // no-op en esta variante (no hay flag de submission)
+}
+
 }
