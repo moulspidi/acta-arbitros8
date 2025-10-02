@@ -36,6 +36,8 @@ public class StoredGamesManager implements StoredGamesService, ScoreListener, Te
     private       StoredGame    mStoredGame;
 
     public StoredGamesManager(Context context) {
+        try { ensureInitializedForIndoor(); } catch (Throwable ignored) {}
+
         mContext = context;
         mRepository = new VbrRepository(mContext);
     }
@@ -365,4 +367,42 @@ public class StoredGamesManager implements StoredGamesService, ScoreListener, Te
         // no-op
     }
 
+
+    // --- Defensive init to avoid NPEs when opening Indoor 6x6 before lineup submission
+    private void ensureInitializedForIndoor() {
+        try {
+            if (mGame == null) {
+                mGame = new com.tonkar.volleyballreferee.engine.game.indoor.IndoorGame();
+            }
+        } catch (Throwable ignored) {}
+        try {
+            if (mStoredGame == null) {
+                mStoredGame = new com.tonkar.volleyballreferee.engine.api.model.StoredGame();
+                try { mStoredGame.setKind(com.tonkar.volleyballreferee.engine.game.GameType.INDOOR); } catch (Throwable ignored2) {}
+            }
+        } catch (Throwable ignored) {}
+        try {
+            java.util.List<com.tonkar.volleyballreferee.engine.api.model.SetDto> sets = mStoredGame.getSets();
+            if (sets == null) {
+                sets = new java.util.ArrayList<>();
+                mStoredGame.setSets(sets);
+            }
+            if (sets.isEmpty()) {
+                com.tonkar.volleyballreferee.engine.api.model.SetDto set0 = new com.tonkar.volleyballreferee.engine.api.model.SetDto();
+                try { set0.setIndex(0); } catch (Throwable ignored2) {}
+                set0.setHomeCourt(new com.tonkar.volleyballreferee.engine.api.model.CourtDto());
+                set0.setGuestCourt(new com.tonkar.volleyballreferee.engine.api.model.CourtDto());
+                set0.setHomeBench(new java.util.ArrayList<>());
+                set0.setGuestBench(new java.util.ArrayList<>());
+                sets.add(set0);
+            } else {
+                com.tonkar.volleyballreferee.engine.api.model.SetDto set0 = sets.get(0);
+                if (set0.getHomeCourt() == null) set0.setHomeCourt(new com.tonkar.volleyballreferee.engine.api.model.CourtDto());
+                if (set0.getGuestCourt() == null) set0.setGuestCourt(new com.tonkar.volleyballreferee.engine.api.model.CourtDto());
+                if (set0.getHomeBench() == null) set0.setHomeBench(new java.util.ArrayList<>());
+                if (set0.getGuestBench() == null) set0.setGuestBench(new java.util.ArrayList<>());
+            }
+        } catch (Throwable ignored) {}
+    }
+    
 }

@@ -83,6 +83,21 @@ public class GameActivity extends AppCompatActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        try {
+            if (mStoredGamesService instanceof com.tonkar.volleyballreferee.engine.service.StoredGamesManager) {
+                com.tonkar.volleyballreferee.engine.service.StoredGamesManager _mgr =
+                    (com.tonkar.volleyballreferee.engine.service.StoredGamesManager) mStoredGamesService;
+                java.lang.reflect.Method m = _mgr.getClass().getDeclaredMethod("ensureInitializedForIndoor");
+                m.setAccessible(true);
+                m.invoke(_mgr);
+            }
+        } catch (Throwable ignored) {}
+        try {
+            if (mGame == null) {
+                mGame = new com.tonkar.volleyballreferee.engine.game.indoor.IndoorGame();
+            }
+        } catch (Throwable ignored) {}
+        
         preSignCoaches = getIntent().getBooleanExtra("pre_sign_coaches", false);
 
         mStoredGamesService = new StoredGamesManager(this);
