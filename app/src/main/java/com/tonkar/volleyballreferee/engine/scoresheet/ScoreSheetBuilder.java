@@ -1216,70 +1216,68 @@ return sanctionDiv;
                 UiUtils.getTextColor(mContext, mStoredGame.getLiberoColor(TeamType.GUEST)));
     
         return "<!doctype html>\n"
-            + "<html>\n"
-            + "  <head>\n"
-            + "    <meta charset=\"utf-8\">\n"
-            + "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n"
-            + "    <title>" + title + "</title>\n"
-            + "    <style>\n"
-            + "      html * { font-family: Roboto, Arial, sans-serif; font-size: 12px !important; }\n"
-            + "      .vbr-body { color: " + colorIntToHtml(ContextCompat.getColor(mContext, R.color.colorOnScoreSheetBackground)) + "; "
-            + "                 width: 28cm; max-width: 28cm; margin-left:auto; margin-right:auto; }\n"
-            + "      .vbr-captain { text-decoration: underline; }\n"
-            + "      .vbr-home-team { color:" + homeTeamColor + "; background-color:" + homeTeamBackgroundColor + "; }\n"
-            + "      .vbr-home-libero { color:" + homeLiberoColor + "; background-color:" + homeLiberoBackgroundColor + "; }\n"
-            + "      .vbr-guest-team { color:" + guestTeamColor + "; background-color:" + guestTeamBackgroundColor + "; }\n"
-            + "      .vbr-guest-libero { color:" + guestLiberoColor + "; background-color:" + guestLiberoBackgroundColor + "; }\n"
-            + "      .div-card { background-color:" + colorIntToHtml(ContextCompat.getColor(mContext, R.color.colorScoreSheetBackground)) + "; "
-            + "                 padding:6px; margin:6px; box-shadow:0 1px 3px rgba(0,0,0,.12), 0 1px 2px rgba(0,0,0,.24); }\n"
-            + "      .div-title { font-weight:700; margin-bottom:6px; }\n"
-            + "      .div-grid-h-g { display:grid; grid-template-columns:4fr 1fr 4fr; align-items:stretch; }\n"
-            + "      .div-grid-1-2-3 { display:grid; grid-template-columns:4fr 1fr 4fr 1fr 4fr; align-items:stretch; }\n"
-            + "      .div-grid-game-header-logo { display:grid; grid-template-columns:4fr 6fr; align-items:stretch; }\n"
-            + "      .div-grid-game-header-info { display:grid; grid-template-columns:40fr 20fr 20fr 8fr 12fr; align-items:stretch; }\n"
-            + "      .div-grid-sets-info { display:grid; grid-template-columns:40fr 5fr 5fr 5fr 5fr 5fr 5fr 10fr 20fr; align-items:stretch; }\n"
-            + "      .div-flex-row { display:flex; flex-flow:row wrap; align-items:flex-start; }\n"
-            + "      .div-flex-column { display:flex; flex-flow:column wrap; align-items:flex-start; }\n"
-            + "      .div-grid-team { display:grid; grid-template-columns:1fr 8fr 1fr 8fr; align-items:center; }\n"
-            + "      .div-grid-set-header-info { min-width:175px; display:grid; grid-template-columns:3fr 1fr; }\n"
-            + "      .div-grid-set-header-time { min-width:250px; display:grid; grid-template-columns:7fr 3fr; }\n"
-            + "      .set-index-cell { grid-row:1 / span 2; line-height:44px; }\n"
-            + "      .div-grid-lineup { display:grid; grid-template-columns:1fr 1fr 1fr; align-items:center; }\n"
-            + "      .div-grid-substitution { display:grid; grid-template-columns:24fr 16fr 24fr 34fr; align-items:center; }\n"
-            + "      .div-grid-timeout { display:grid; grid-template-columns:1fr 2fr; align-items:center; }\n"
-            + "      .div-grid-sanction { display:grid; grid-template-columns:3fr 2fr 4fr; align-items:center; }\n"
-            + "      .div-grid-signature { display:grid; grid-template-columns:2fr 5fr; align-items:stretch; }\n"
-            + "      .div-footer { font-size:10px; position:fixed; display:flex; align-items:center; bottom:12px; right:12px; }\n"
-            + "      .cell { min-width:22px; text-align:center; padding:3px; }\n"
-            + "      .bordered-cell { border:1px solid " + colorIntToHtml(ContextCompat.getColor(mContext, R.color.colorOnScoreSheetBackground)) + "; "
-            + "                      min-width:22px; text-align:center; padding:3px; margin-right:-1px; margin-left:-1px; }\n"
-            + "      .remarks-cell { border:1px solid " + colorIntToHtml(ContextCompat.getColor(mContext, R.color.colorOnScoreSheetBackground)) + "; "
-            + "                      padding:3px; min-height:40px; }\n"
-            + "      .signature-title-cell { border:1px solid " + colorIntToHtml(ContextCompat.getColor(mContext, R.color.colorOnScoreSheetBackground)) + "; "
-            + "                             grid-row:1 / span 2; height:82px; text-align:center; padding:3px; margin:0 -1px; }\n"
-            + "      .signature-name-cell { border:1px solid " + colorIntToHtml(ContextCompat.getColor(mContext, R.color.colorOnScoreSheetBackground)) + "; "
-            + "                            height:14px; line-height:14px; text-align:center; padding:3px; margin:0 -1px; }\n"
-            + "      .signature-cell { border:1px solid " + colorIntToHtml(ContextCompat.getColor(mContext, R.color.colorOnScoreSheetBackground)) + "; "
-            + "                        height:60px; line-height:60px; text-align:center; padding:3px; margin:0 -1px; }\n"
-            + "      .signature-image { width:auto; height:100%; }\n"
-            + "      .logo-image { width:auto; height:60px; padding:3px; margin-left:auto; margin-right:auto; }\n"
-            + "      .set-anchor { color:" + colorIntToHtml(ContextCompat.getColor(mContext, R.color.colorOnScoreSheetBackground)) + "; }\n"
-            + "      .badge { min-width:22px; text-align:center; padding:3px; margin:2px; border-radius:5px; }\n"
-            + "      .spacing-before { margin-top:12px; }\n"
-            + "      .ladder-spacing { margin-bottom:10px; }\n"
-            + "      .horizontal-spacing { min-width:34px; }\n"
-            + "      .border { border:1px solid " + colorIntToHtml(ContextCompat.getColor(mContext, R.color.colorOnScoreSheetBackground)) + "; "
-            + "                margin-right:-1px; margin-left:-1px; }\n"
-            + "      .new-page-for-printers { break-before: page; }\n"
-            + "    
-"            + "      .sanctions-section{grid-column:1/-1;width:100%;clear:both;}
-"
-"            + "    </style>
-"
-            + "    <style type=\"text/css\" media=\"print\"> body { -webkit-print-color-adjust: exact; } </style>\n"
-            + "  </head>\n"
-            + "  <body class=\"vbr-body\"></body>\n"
-            + "</html>\n";
+        + "<html>\n"
+        + "  <head>\n"
+        + "    <meta charset=\"utf-8\">\n"
+        + "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n"
+        + "    <title>" + title + "</title>\n"
+        + "    <style>\n"
+        + "      html * { font-family: Roboto, Arial, sans-serif; font-size: 12px !important; }\n"
+        + "      .vbr-body { color: " + colorIntToHtml(ContextCompat.getColor(mContext, R.color.colorOnScoreSheetBackground)) + "; "
+        + "                 width: 28cm; max-width: 28cm; margin-left:auto; margin-right:auto; }\n"
+        + "      .vbr-captain { text-decoration: underline; }\n"
+        + "      .vbr-home-team { color:" + homeTeamColor + "; background-color:" + homeTeamBackgroundColor + "; }\n"
+        + "      .vbr-home-libero { color:" + homeLiberoColor + "; background-color:" + homeLiberoBackgroundColor + "; }\n"
+        + "      .vbr-guest-team { color:" + guestTeamColor + "; background-color:" + guestTeamBackgroundColor + "; }\n"
+        + "      .vbr-guest-libero { color:" + guestLiberoColor + "; background-color:" + guestLiberoBackgroundColor + "; }\n"
+        + "      .div-card { background-color:" + colorIntToHtml(ContextCompat.getColor(mContext, R.color.colorScoreSheetBackground)) + "; "
+        + "                 padding:6px; margin:6px; box-shadow:0 1px 3px rgba(0,0,0,.12), 0 1px 2px rgba(0,0,0,.24); }\n"
+        + "      .div-title { font-weight:700; margin-bottom:6px; }\n"
+        + "      .div-grid-h-g { display:grid; grid-template-columns:4fr 1fr 4fr; align-items:stretch; }\n"
+        + "      .div-grid-1-2-3 { display:grid; grid-template-columns:4fr 1fr 4fr 1fr 4fr; align-items:stretch; }\n"
+        + "      .div-grid-game-header-logo { display:grid; grid-template-columns:4fr 6fr; align-items:stretch; }\n"
+        + "      .div-grid-game-header-info { display:grid; grid-template-columns:40fr 20fr 20fr 8fr 12fr; align-items:stretch; }\n"
+        + "      .div-grid-sets-info { display:grid; grid-template-columns:40fr 5fr 5fr 5fr 5fr 5fr 5fr 10fr 20fr; align-items:stretch; }\n"
+        + "      .div-flex-row { display:flex; flex-flow:row wrap; align-items:flex-start; }\n"
+        + "      .div-flex-column { display:flex; flex-flow:column wrap; align-items:flex-start; }\n"
+        + "      .div-grid-team { display:grid; grid-template-columns:1fr 8fr 1fr 8fr; align-items:center; }\n"
+        + "      .div-grid-set-header-info { min-width:175px; display:grid; grid-template-columns:3fr 1fr; }\n"
+        + "      .div-grid-set-header-time { min-width:250px; display:grid; grid-template-columns:7fr 3fr; }\n"
+        + "      .set-index-cell { grid-row:1 / span 2; line-height:44px; }\n"
+        + "      .div-grid-lineup { display:grid; grid-template-columns:1fr 1fr 1fr; align-items:center; }\n"
+        + "      .div-grid-substitution { display:grid; grid-template-columns:24fr 16fr 24fr 34fr; align-items:center; }\n"
+        + "      .div-grid-timeout { display:grid; grid-template-columns:1fr 2fr; align-items:center; }\n"
+        + "      .div-grid-sanction { display:grid; grid-template-columns:3fr 2fr 4fr; align-items:center; }\n"
+        + "      .div-grid-signature { display:grid; grid-template-columns:2fr 5fr; align-items:stretch; }\n"
+        + "      .div-footer { font-size:10px; position:fixed; display:flex; align-items:center; bottom:12px; right:12px; }\n"
+        + "      .cell { min-width:22px; text-align:center; padding:3px; }\n"
+        + "      .bordered-cell { border:1px solid " + colorIntToHtml(ContextCompat.getColor(mContext, R.color.colorOnScoreSheetBackground)) + "; "
+        + "                      min-width:22px; text-align:center; padding:3px; margin-right:-1px; margin-left:-1px; }\n"
+        + "      .remarks-cell { border:1px solid " + colorIntToHtml(ContextCompat.getColor(mContext, R.color.colorOnScoreSheetBackground)) + "; "
+        + "                      padding:3px; min-height:40px; }\n"
+        + "      .signature-title-cell { border:1px solid " + colorIntToHtml(ContextCompat.getColor(mContext, R.color.colorOnScoreSheetBackground)) + "; "
+        + "                             grid-row:1 / span 2; height:82px; text-align:center; padding:3px; margin:0 -1px; }\n"
+        + "      .signature-name-cell { border:1px solid " + colorIntToHtml(ContextCompat.getColor(mContext, R.color.colorOnScoreSheetBackground)) + "; "
+        + "                            height:14px; line-height:14px; text-align:center; padding:3px; margin:0 -1px; }\n"
+        + "      .signature-cell { border:1px solid " + colorIntToHtml(ContextCompat.getColor(mContext, R.color.colorOnScoreSheetBackground)) + "; "
+        + "                        height:60px; line-height:60px; text-align:center; padding:3px; margin:0 -1px; }\n"
+        + "      .signature-image { width:auto; height:100%; }\n"
+        + "      .logo-image { width:auto; height:60px; padding:3px; margin-left:auto; margin-right:auto; }\n"
+        + "      .set-anchor { color:" + colorIntToHtml(ContextCompat.getColor(mContext, R.color.colorOnScoreSheetBackground)) + "; }\n"
+        + "      .badge { min-width:22px; text-align:center; padding:3px; margin:2px; border-radius:5px; }\n"
+        + "      .spacing-before { margin-top:12px; }\n"
+        + "      .ladder-spacing { margin-bottom:10px; }\n"
+        + "      .horizontal-spacing { min-width:34px; }\n"
+        + "      .border { border:1px solid " + colorIntToHtml(ContextCompat.getColor(mContext, R.color.colorOnScoreSheetBackground)) + "; "
+        + "                margin-right:-1px; margin-left:-1px; }\n"
+        + "      .new-page-for-printers { break-before: page; }\n"
+        + "      .sanctions-section { grid-column: 1 / -1; width: 100%; clear: both; }\n"
+        + "    </style>\n"
+        + "    <style type=\"text/css\" media=\"print\"> body { -webkit-print-color-adjust: exact; } </style>\n"
+        + "  </head>\n"
+        + "  <body class=\"vbr-body\"></body>\n"
+        + "</html>\n";
+
     }
 
 
@@ -1379,4 +1377,20 @@ String getSanctionImageClass(SanctionType card) {
         wrapperDiv.appendChild(ladderDiv);
         return wrapperDiv;
     }
+    }
+
+    // Friendly label for sanctions (no jersey repeat; IR shown correctly)
+    private String getSanctionDisplayName(com.tonkar.volleyballreferee.engine.api.model.SanctionDto s) {
+        try {
+            com.tonkar.volleyballreferee.engine.game.sanction.SanctionType t = s.getCard();
+            if (t == com.tonkar.volleyballreferee.engine.game.sanction.SanctionType.IMPROPER_REQUEST_WARNING) return "IR Warning";
+            if (t == com.tonkar.volleyballreferee.engine.game.sanction.SanctionType.IMPROPER_REQUEST_PENALTY) return "IR Penalty";
+            if (t == com.tonkar.volleyballreferee.engine.game.sanction.SanctionType.DELAY_WARNING) return "Delay Warning";
+            if (t == com.tonkar.volleyballreferee.engine.game.sanction.SanctionType.DELAY_PENALTY) return "Delay Penalty";
+            if (t == com.tonkar.volleyballreferee.engine.game.sanction.SanctionType.YELLOW_CARD) return "Yellow Card";
+            if (t == com.tonkar.volleyballreferee.engine.game.sanction.SanctionType.RED_CARD) return "Red Card";
+            if (t == com.tonkar.volleyballreferee.engine.game.sanction.SanctionType.EXPULSION) return "Expulsion";
+            if (t == com.tonkar.volleyballreferee.engine.game.sanction.SanctionType.DISQUALIFICATION) return "Disqualification";
+        } catch (Throwable ignored) {}
+        return "Sanction";
     }
