@@ -259,4 +259,12 @@ public class StoredGamesManager implements StoredGamesService, ScoreListener, Te
         try { return mGame; } catch (Throwable ignored) { return null; }
     }
     
+
+    @Override
+    public void deleteCurrentGame() {
+        // Local-only implementation: limpiar referencias en memoria
+        try { mStoredGame = null; } catch (Throwable ignored) {}
+        try { mGame = null; } catch (Throwable ignored) {}
+    }
+    
 }
