@@ -154,7 +154,9 @@ public class StoredGamesManager implements StoredGamesService, ScoreListener, Te
             mStoredGame.getStartingLineup(TeamType.GUEST, setIndex).setPlayerAt(p, pos);
             mStoredGame.getSets().get(setIndex).getCurrentPlayers(TeamType.GUEST).setPlayerAt(p, pos);
         }
-    }
+    
+        try { mGame.restoreTeams(mStoredGame); } catch (Throwable ignored) {}
+}
 public void deleteCurrentGame() {
         mRepository.deleteCurrentGame();
         mStoredGame = null;
