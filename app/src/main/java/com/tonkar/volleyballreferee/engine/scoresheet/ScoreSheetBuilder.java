@@ -588,17 +588,8 @@ public class ScoreSheetBuilder {
             score = delayLabel + " · " + score;
         }
 
-        
-// Compose a rich label: DisplayName — WHO — SCORE
-String displayName = getSanctionDisplayName(sanction);
-int numVal = 0;
-try { numVal = sanction.getNum(); } catch (Throwable ignored) {}
-String who = null;
-who = (numVal <= 0) ? "TEAM" : String.valueOf(numVal);
-String labelText = String.format("%s — %s — %s", displayName, who, score);
-sanctionDiv.appendChild(createCellSpan(labelText, false, false));
-return sanctionDiv;
-
+        sanctionDiv.appendChild(createCellSpan(score, false, false));
+        return sanctionDiv;
 }private Element createLadderItem(TeamType teamType, int score) {
         Element ladderItemDiv = new Element("div");
         ladderItemDiv.addClass("div-flex-column").addClass("ladder-spacing");
@@ -1311,31 +1302,7 @@ return sanctionDiv;
     
 
     // === Helpers añadidos ===
-    // Human-readable display name for sanctions (English labels with abbreviations)
-    private String getSanctionDisplayName(com.tonkar.volleyballreferee.engine.api.model.SanctionDto sanction) {
-        try {
-            if (sanction != null) {
-                try {
-                    if (sanction.isImproperRequest()) {
-                        return "Improper Request (IR)";
-                    }
-                } catch (Throwable ignored) {}
-                com.tonkar.volleyballreferee.engine.game.sanction.SanctionType t = sanction.getCard();
-                if (t == null) return "Sanction";
-                switch (t) {
-                    case YELLOW: return "Yellow Card";
-                    case RED: return "Red Card (Penalty)";
-                    case RED_EXPULSION: return "Expulsion";
-                    case RED_DISQUALIFICATION: return "Disqualification";
-                    case DELAY_WARNING: return "Delay Warning";
-                    case DELAY_PENALTY: return "Delay Penalty (Point)";
-                    default: return t.name();
-                }
-            }
-        } catch (Throwable ignored) { }
-        return "Sanction";
-    }
-String getSanctionImageClass(SanctionType card) {
+    private String getSanctionImageClass(SanctionType card) {
         if (card == null) return "yellow-card-image";
         switch (card) {
             case YELLOW: return "yellow-card-image";
@@ -1374,4 +1341,22 @@ String getSanctionImageClass(SanctionType card) {
         wrapperDiv.appendChild(ladderDiv);
         return wrapperDiv;
     }
+    
+    // Maps sanction to a short, English display name (no player number repetition).
+    private String getSanctionDisplayName(com.tonkar.volleyballreferee.engine.api.model.SanctionDto sanction) {
+        if (sanction == null || sanction.getCard() == null) return "";
+        final com.tonkar.volleyballreferee.engine.game.sanction.SanctionType t = sanction.getCard();
+        switch (t) {
+            case YELLOW: return "Yellow Card";
+            case RED: return "Red Card (Penalty)";
+            case RED_EXPULSION: return "Expulsion";
+            case RED_DISQUALIFICATION: return "Disqualification";
+            case DELAY_WARNING: return "Delay Warning";
+            case DELAY_PENALTY: return "Delay Penalty";
+            case IMPROPER_REQUEST_WARNING: return "IR Warning";
+            case IMPROPER_REQUEST_PENALTY: return "IR Penalty";
+            default: return t.name();
+        }
     }
+
+}
