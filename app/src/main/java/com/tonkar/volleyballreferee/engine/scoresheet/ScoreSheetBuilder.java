@@ -524,6 +524,7 @@ public class ScoreSheetBuilder {
 
     private Element createStoredSanctions(int setIndex) {
         Element wrapperDiv = new Element("div");
+        wrapperDiv.addClass("sanctions-section");
 
         wrapperDiv.appendChild(createTitleDiv(mContext.getString(R.string.sanctions_tab)));
 
@@ -595,7 +596,7 @@ int numVal = 0;
 try { numVal = sanction.getNum(); } catch (Throwable ignored) {}
 String who = null;
 who = (numVal <= 0) ? "TEAM" : String.valueOf(numVal);
-String labelText = String.format("%s — %s", displayName, score);  // removed player number duplicate
+String labelText = String.format("%s — %s — %s", displayName, who, score);
 sanctionDiv.appendChild(createCellSpan(labelText, false, false));
 return sanctionDiv;
 
@@ -1270,7 +1271,11 @@ return sanctionDiv;
             + "      .border { border:1px solid " + colorIntToHtml(ContextCompat.getColor(mContext, R.color.colorOnScoreSheetBackground)) + "; "
             + "                margin-right:-1px; margin-left:-1px; }\n"
             + "      .new-page-for-printers { break-before: page; }\n"
-            + "    </style>\n"
+            + "    
+.sanctions-section{grid-column:1/-1;width:100%;clear:both;}
+
+.sanctions-section{grid-column:1/-1;width:100%;clear:both;}
+</style>\n"
             + "    <style type=\"text/css\" media=\"print\"> body { -webkit-print-color-adjust: exact; } </style>\n"
             + "  </head>\n"
             + "  <body class=\"vbr-body\"></body>\n"
