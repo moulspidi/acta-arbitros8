@@ -236,4 +236,13 @@ public class StoredGamesManager implements StoredGamesService, ScoreListener, Te
         }
     }
     
+
+    @Override
+    public void syncGames(DataSynchronizationListener listener) {
+        // No-op local sync; immediately signal success
+        if (listener != null) {
+            try { listener.onSynchronizationSucceeded(); } catch (Throwable ignored) {}
+        }
+    }
+    
 }
