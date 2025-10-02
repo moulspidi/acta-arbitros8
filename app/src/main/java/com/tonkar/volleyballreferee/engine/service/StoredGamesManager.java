@@ -154,9 +154,38 @@ public class StoredGamesManager implements StoredGamesService, ScoreListener, Te
             mStoredGame.getStartingLineup(TeamType.GUEST, setIndex).setPlayerAt(p, pos);
             mStoredGame.getSets().get(setIndex).getCurrentPlayers(TeamType.GUEST).setPlayerAt(p, pos);
         }
-    
-        try { mGame.restoreTeams(mStoredGame); } catch (Throwable ignored) {}
-}
+
+        // --- ROSTER SYNC MARK: keep roster (players + liberos) consistent with StoredGame selections ---
+        for (TeamType teamType : new TeamType[]{TeamType.HOME, TeamType.GUEST}) {
+            try {
+                java.util.Set<Integer> selected = new java.util.TreeSet<>();
+                for (PlayerDto p : mStoredGame.getPlayers(teamType)) selected.add(p.getNum());
+                for (PlayerDto p : mStoredGame.getLiberos(teamType)) selected.add(p.getNum());
+                // remove players no longer selected
+                java.util.Set<Integer> current = new java.util.TreeSet<>();
+                for (PlayerDto p : mGame.getPlayers(teamType)) current.add(p.getNum());
+                for (Integer n : new java.util.TreeSet<>(current)) {
+                    if (!selected.contains(n)) mGame.removePlayer(teamType, n);
+                }
+                // add missing players and names
+                for (PlayerDto p : mStoredGame.getPlayers(teamType)) {
+                    if (!current.contains(p.getNum())) mGame.addPlayer(teamType, p.getNum());
+                    if (p.getName()!=null && !p.getName().trim().isEmpty())
+                        mGame.setPlayerName(teamType, p.getNum(), p.getName());
+                }
+                for (PlayerDto p : mStoredGame.getLiberos(teamType)) {
+                    if (!current.contains(p.getNum())) mGame.addPlayer(teamType, p.getNum());
+                    if (p.getName()!=null && !p.getName().trim().isEmpty())
+                        mGame.setPlayerName(teamType, p.getNum(), p.getName());
+                    mGame.addLibero(teamType, p.getNum());
+                }
+                // captain / colors to keep UI consistent
+                mGame.setCaptain(teamType, mStoredGame.getCaptain(teamType));
+                mGame.setLiberoColor(teamType, mStoredGame.getLiberoColor(teamType));
+            } catch (Throwable ignored) {}
+        }
+        // --- END ROSTER SYNC MARK ---
+    }
 public void deleteCurrentGame() {
         mRepository.deleteCurrentGame();
         mStoredGame = null;
