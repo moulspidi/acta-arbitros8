@@ -281,4 +281,88 @@ public class StoredGamesManager implements StoredGamesService, ScoreListener, Te
         try { /* optionally could pushCurrentSetToServer(); */ } catch (Throwable ignored) {}
     }
     
+
+    @Override
+    public void onPointsUpdated(TeamType teamType, int newCount) {
+        // no-op
+    }
+
+
+    @Override
+    public void onSetsUpdated(TeamType teamType, int newCount) {
+        // no-op
+    }
+
+
+    @Override
+    public void onServiceSwapped(TeamType teamType, boolean isStart) {
+        // no-op
+    }
+
+
+    @Override
+    public void onSetStarted() {
+        // no-op
+    }
+
+
+    @Override
+    public void onStartingLineupSubmitted(TeamType teamType) {
+        // no-op
+    }
+
+
+    @Override
+    public void onTeamsSwapped(TeamType leftTeamType, TeamType rightTeamType, ActionOriginType actionOriginType) {
+        // no-op
+    }
+
+
+    @Override
+    public void onPlayerChanged(TeamType teamType, int number, PositionType positionType, ActionOriginType actionOriginType) {
+        // no-op
+    }
+
+
+    @Override
+    public void onTeamRotated(TeamType teamType, boolean clockwise) {
+        // no-op
+    }
+
+
+    @Override
+    public void onTimeoutUpdated(TeamType teamType, int maxCount, int newCount) {
+        // no-op
+    }
+
+
+    @Override
+    public void onTimeout(TeamType teamType, int duration) {
+        // no-op
+    }
+
+
+    @Override
+    public void onTechnicalTimeout(int duration) {
+        // no-op
+    }
+
+
+    @Override
+    public void onGameInterval(int duration) {
+        // no-op
+    }
+
+
+    @Override
+    public void onSanction(TeamType teamType, SanctionType sanctionType, int number) {
+        // no-op
+    }
+
+
+    @Override
+    public void onUndoSanction(TeamType teamType, SanctionType sanctionType, int number) {
+        // no-op
+    }
+
 }
