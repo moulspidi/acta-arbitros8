@@ -216,4 +216,15 @@ public class StoredGamesManager implements StoredGamesService, ScoreListener, Te
         if (listener != null) listener.onSynchronizationSucceeded();
     }
     
+
+    @Override
+    public void downloadAvailableGames(AsyncGameRequestListener listener) {
+        // No-op in local variant; immediately succeed with empty list
+        if (listener != null) {
+            try {
+                listener.onSynchronizationSucceeded(new java.util.ArrayList<>());
+            } catch (Throwable ignored) {}
+        }
+    }
+    
 }
