@@ -274,4 +274,11 @@ public class StoredGamesManager implements StoredGamesService, ScoreListener, Te
         try { /* optionally clear current game */ } catch (Throwable ignored) {}
     }
     
+
+    @Override
+    public void onSetCompleted() {
+        // No-op for local variant; nothing to push
+        try { /* optionally could pushCurrentSetToServer(); */ } catch (Throwable ignored) {}
+    }
+    
 }
