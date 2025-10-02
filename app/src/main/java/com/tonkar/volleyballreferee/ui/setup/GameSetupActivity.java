@@ -102,8 +102,10 @@ public class GameSetupActivity extends AppCompatActivity {
                 }
             }
                         ((StoredGamesManager)storedGamesService).applySetupLineupToFirstSet();
-            /* storedGamesService.saveCurrentGame(true); */} else {
-            /* storedGamesService.saveSetupGame(mGame); */}
+            storedGamesService.saveCurrentGame(true);
+        } else {
+            storedGamesService.saveSetupGame(mGame);
+        }
     }
 
     @Override
@@ -132,26 +134,34 @@ public class GameSetupActivity extends AppCompatActivity {
 
     
     public void applyChangesAndReturn(View view) {
-    try {
-        // Persist teams/rules/league from UI into mGame
+        // Guardar cambios sobre el juego actual y volver sin iniciar nuevo set
         saveTeams();
         saveRules();
         saveLeague();
-
-        // Mark updated
-        mGame.setUpdatedAt(System.currentTimeMillis());
-
-        // Apply setup to first set and save once, here (no onPause side-effects)
         StoredGamesService storedGamesService = new StoredGamesManager(this);
-        storedGamesService.connectGameRecorder(mGame);
-
-        try { ((StoredGamesManager) storedGamesService).applySetupLineupToFirstSet(); } catch (Throwable ignored) {}
-
-        storedGamesService.saveCurrentGame(true);
-    } catch (Throwable ignored) {}
-
-    finish();
-}
+        if (mEditCurrent) {
+            // Persistir el juego actual
+            if (mGame != null) {
+                // Force updatedAt to ensure DB overwrite
+                mGame.setUpdatedAt(System.currentTimeMillis());
+                mGame.setUpdatedAt(TeamType.HOME, System.currentTimeMillis());
+                mGame.setUpdatedAt(TeamType.GUEST, System.currentTimeMillis());
+                if (storedGamesService instanceof StoredGamesManager) {
+                    ((StoredGamesManager) storedGamesService).connectGameRecorder(mGame);
+                    ((StoredGamesManager) storedGamesService).applySetupLineupToFirstSet();
+                    
+                }
+            }
+            storedGamesService.saveCurrentGame(true);
+        }
+        // Volver al partido
+        final Intent gameIntent = new Intent(GameSetupActivity.this, GameActivity.class);
+        gameIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        gameIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        gameIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(gameIntent);
+        UiUtils.animateCreate(this);
+    }
     public void startGame(View view) {
         Log.i(Tags.SETUP_UI, "Start game");
 

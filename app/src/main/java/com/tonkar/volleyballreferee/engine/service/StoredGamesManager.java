@@ -36,8 +36,6 @@ public class StoredGamesManager implements StoredGamesService, ScoreListener, Te
     private       StoredGame    mStoredGame;
 
     public StoredGamesManager(Context context) {
-        try { ensureInitializedForIndoor(); } catch (Throwable ignored) {}
-
         mContext = context;
         mRepository = new VbrRepository(mContext);
     }
@@ -141,263 +139,694 @@ public class StoredGamesManager implements StoredGamesService, ScoreListener, Te
         saveCurrentGame(false);
     }
 
-    public void applySetupLineupToFirstSet()
-{
-    // Conservative apply: sync roster numbers from game definitions to live game.
-    try {
-        if (mGame == null) return;
-        // Synchronize HOME and GUEST rosters using public Game APIs (add/removePlayer)
-        for (com.tonkar.volleyballreferee.engine.team.TeamType team : com.tonkar.volleyballreferee.engine.team.TeamType.values()) {
-            try {
-                java.util.Set<Integer> current = new java.util.TreeSet<>();
-                for (com.tonkar.volleyballreferee.engine.api.model.PlayerDto p : mGame.getPlayers(team)) { if (p != null && p.getNum() > 0) current.add(p.getNum()); }
-
-                java.util.Set<Integer> desired = new java.util.TreeSet<>();
-                try {
-                    // Preferred: read from mGame team definitions saved by setup UI
-                    for (com.tonkar.volleyballreferee.engine.api.model.PlayerDto p : mGame.getPlayers(team)) { if (p != null && p.getNum() > 0) desired.add(p.getNum()); }
-                } catch (Throwable ignored) {}
-
-                // If nothing in desired, do nothing
-                if (!desired.isEmpty()) {
-                    // Remove players not desired
-                    for (Integer n : new java.util.TreeSet<>(current)) {
-                        if (!desired.contains(n)) {
-                            try { mGame.removePlayer(team, n); } catch (Throwable ignored) {}
-                        }
-                    }
-                    // Add missing players
-                    for (Integer n : desired) {
-                        if (!current.contains(n)) {
-                            try { mGame.addPlayer(team, n); } catch (Throwable ignored) {}
-                        }
-                    }
-                }
-            } catch (Throwable ignored) {}
+    public void applySetupLineupToFirstSet() {
+        if (mGame == null || mStoredGame == null) return;
+        final int setIndex = 0;
+        // HOME
+        for (PositionType pos : PositionType.listPositions(mGame.getKind())) {
+            int p = mGame.getPlayerAtPositionInStartingLineup(TeamType.HOME, pos, setIndex);
+            mStoredGame.getStartingLineup(TeamType.HOME, setIndex).setPlayerAt(p, pos);
+            mStoredGame.getSets().get(setIndex).getCurrentPlayers(TeamType.HOME).setPlayerAt(p, pos);
         }
-    } catch (Throwable ignored) {}
-}
-
-
-
-    public void syncGames() {
-        /* No-op sync in local-only variant */
+// GUEST
+        for (PositionType pos : PositionType.listPositions(mGame.getKind())) {
+            int p = mGame.getPlayerAtPositionInStartingLineup(TeamType.GUEST, pos, setIndex);
+            mStoredGame.getStartingLineup(TeamType.GUEST, setIndex).setPlayerAt(p, pos);
+            mStoredGame.getSets().get(setIndex).getCurrentPlayers(TeamType.GUEST).setPlayerAt(p, pos);
+        }
+    }
+public void deleteCurrentGame() {
+        mRepository.deleteCurrentGame();
+        mStoredGame = null;
     }
 
-    public void cancelGame(String id, DataSynchronizationListener listener) {
-        /* No-op cancel in local-only variant */ if (listener != null) listener.onSynchronizationSucceeded();
-    }
-
+    @Override
     public boolean hasSetupGame() {
-        return false;
+        return mRepository.hasSetupGame();
     }
-
-    public void deleteSetupGame() {
-        /* no-op */
-    }
-
-    private void createCurrentGame() {
-        /* overload calls typed version if available */ try { createCurrentGame(mGame); } catch (Throwable ignored) {}
-    }
-
-    private void pushCurrentGameToServer() {
-        /* no-op server sync */
-    }
-
-    private void deleteGameOnServer(String id) {
-        /* no-op server delete */
-    }
-
-    private void updateCurrentGame() {
-        /* no-op update */
-    }
-
-    @Override
-    public void scheduleGame(GameSummaryDto gameDescription, boolean create, DataSynchronizationListener listener) {
-        // No-op scheduling in this local variant
-        if (listener != null) listener.onSynchronizationSucceeded();
-    }
-    
-
-    @Override
-    public void downloadAvailableGames(AsyncGameRequestListener listener) {
-        // No-op in local variant; immediately succeed with empty list
-        if (listener != null) {
-            try {
-                listener.onAvailableGamesReceived(new java.util.ArrayList<com.tonkar.volleyballreferee.engine.api.model.GameSummaryDto>());
-            } catch (Throwable ignored) {}
-        }
-    }
-    
-
-    @Override
-    public void downloadGame(String id, AsyncGameRequestListener listener) {
-        // No-op: report not found
-        if (listener != null) {
-            try { listener.onError(404); } catch (Throwable ignored) {}
-        }
-    }
-    
-
-    @Override
-    public void syncGames(DataSynchronizationListener listener) {
-        // No-op local sync; immediately signal success
-        if (listener != null) {
-            try { listener.onSynchronizationSucceeded(); } catch (Throwable ignored) {}
-        }
-    }
-    
-
-    @Override
-    public void saveSetupGame(IGame game) {
-        // Local-only variant: persist nothing here; keep reference if available
-        try { if (game != null) { this.mGame = game; } } catch (Throwable ignored) {}
-    }
-    
 
     @Override
     public IGame loadSetupGame() {
-        // Local-only implementation: devolver la referencia actual si existe
-        try { return mGame; } catch (Throwable ignored) { return null; }
+        return mRepository.getSetupGame();
     }
-    
 
     @Override
-    public void deleteCurrentGame() {
-        // Local-only implementation: limpiar referencias en memoria
-        try { mStoredGame = null; } catch (Throwable ignored) {}
-        try { mGame = null; } catch (Throwable ignored) {}
+    public void saveSetupGame(IGame game) {
+        mRepository.insertSetupGame(game, true);
     }
-    
+
+    @Override
+    public void deleteSetupGame() {
+        mRepository.deleteSetupGame();
+    }
 
     @Override
     public void onMatchCompleted(TeamType winner) {
-        // No-op for local variant; clear and persist nothing
-        try { /* optionally clear current game */ } catch (Throwable ignored) {}
+        updateCurrentGame();
+        if (mStoredGame != null) {
+            mRepository.insertGame(mStoredGame, false, true);
+        }
+        pushCurrentGameToServer();
+        deleteCurrentGame();
     }
-    
-
-    @Override
-    public void onSetCompleted() {
-        // No-op for local variant; nothing to push
-        try { /* optionally could pushCurrentSetToServer(); */ } catch (Throwable ignored) {}
-    }
-    
 
     @Override
     public void onPointsUpdated(TeamType teamType, int newCount) {
-        // no-op
+        saveCurrentGame();
+        pushCurrentSetToServer();
     }
-
 
     @Override
-    public void onSetsUpdated(TeamType teamType, int newCount) {
-        // no-op
-    }
-
+    public void onSetsUpdated(TeamType teamType, int newCount) {}
 
     @Override
-    public void onServiceSwapped(TeamType teamType, boolean isStart) {
-        // no-op
-    }
-
+    public void onServiceSwapped(TeamType teamType, boolean isStart) {}
 
     @Override
     public void onSetStarted() {
-        // no-op
+        saveCurrentGame();
+        pushCurrentGameToServer();
     }
 
+    @Override
+    public void onSetCompleted() {
+        saveCurrentGame(true);
+    }
 
     @Override
     public void onStartingLineupSubmitted(TeamType teamType) {
-        // no-op
+        saveCurrentGame();
+        pushCurrentGameToServer();
     }
-
 
     @Override
     public void onTeamsSwapped(TeamType leftTeamType, TeamType rightTeamType, ActionOriginType actionOriginType) {
-        // no-op
+        saveCurrentGame();
     }
-
 
     @Override
     public void onPlayerChanged(TeamType teamType, int number, PositionType positionType, ActionOriginType actionOriginType) {
-        // no-op
-    }
+        int set = mStoredGame.currentSetIndex();
+        if (set > 0) {
+            boolean lastEmpty =
+                    mStoredGame.getPoints(TeamType.HOME, set) == 0 &&
+                    mStoredGame.getPoints(TeamType.GUEST, set) == 0 &&
+                    mStoredGame.getSubstitutions(TeamType.HOME, set).isEmpty() &&
+                    mStoredGame.getSubstitutions(TeamType.GUEST, set).isEmpty() &&
+                    !mStoredGame.isStartingLineupConfirmed(TeamType.HOME, set) &&
+                    !mStoredGame.isStartingLineupConfirmed(TeamType.GUEST, set);
+            if (lastEmpty) set = set - 1;
+        }
 
+        saveCurrentGame();
+        pushCurrentSetToServer();
+    }
 
     @Override
     public void onTeamRotated(TeamType teamType, boolean clockwise) {
-        // no-op
+        saveCurrentGame();
+        pushCurrentSetToServer();
     }
-
 
     @Override
     public void onTimeoutUpdated(TeamType teamType, int maxCount, int newCount) {
-        // no-op
+        saveCurrentGame();
+        pushCurrentGameToServer();
     }
-
 
     @Override
     public void onTimeout(TeamType teamType, int duration) {
-        // no-op
+        saveCurrentGame();
+        pushCurrentGameToServer();
     }
-
 
     @Override
     public void onTechnicalTimeout(int duration) {
-        // no-op
+        saveCurrentGame();
+        pushCurrentGameToServer();
     }
-
 
     @Override
-    public void onGameInterval(int duration) {
-        // no-op
-    }
-
+    public void onGameInterval(int duration) {}
 
     @Override
     public void onSanction(TeamType teamType, SanctionType sanctionType, int number) {
-        // no-op
+        saveCurrentGame();
+        pushCurrentGameToServer();
     }
-
 
     @Override
     public void onUndoSanction(TeamType teamType, SanctionType sanctionType, int number) {
-        // no-op
+        saveCurrentGame();
+        pushCurrentGameToServer();
     }
 
+    private void createCurrentGame() {
+        mStoredGame = new StoredGame();
+        mStoredGame.setId(mGame.getId());
+        mStoredGame.setCreatedBy(mGame.getCreatedBy());
+        mStoredGame.setCreatedAt(mGame.getCreatedAt());
+        mStoredGame.setUpdatedAt(mGame.getUpdatedAt());
+        mStoredGame.setScheduledAt(mGame.getScheduledAt());
+        mStoredGame.setRefereedBy(mGame.getRefereedBy());
+        mStoredGame.setRefereeName(mGame.getRefereeName());
+        mStoredGame.setReferee1Name(mGame.getReferee1Name());
+        mStoredGame.setReferee2Name(mGame.getReferee2Name());
+        mStoredGame.setScorerName(mGame.getScorerName());
+        mStoredGame.setKind(mGame.getKind());
+        mStoredGame.setGender(mGame.getGender());
+        mStoredGame.setUsage(mGame.getUsage());
+        mStoredGame.setStatus(mGame.getMatchStatus());
+        if (mGame.getLeague() != null && mGame.getKind().equals(mGame.getLeague().getKind()) && mGame
+                .getLeague()
+                .getName()
+                .length() > 1 && mGame.getLeague().getDivision().length() > 1) {
+            SelectedLeagueDto league = new SelectedLeagueDto();
+            league.setAll(mGame.getLeague());
+            mStoredGame.setLeague(league);
+        } else {
+            mStoredGame.setLeague(null);
+        }
 
-    // --- Defensive init to avoid NPEs when opening Indoor 6x6 before lineup submission
-    private void ensureInitializedForIndoor() { /* no-op for this variant */ }
-        } catch (Throwable ignored) {}
-        try {
-            if (mStoredGame == null) {
-try { mStoredGame.setKind(com.tonkar.volleyballreferee.engine.game.GameType.INDOOR); } catch (Throwable ignored2) {}
-            }
-        } catch (Throwable ignored) {}
-        try {
-            java.util.List<com.tonkar.volleyballreferee.engine.api.model.SetDto> sets = mStoredGame.getSets();
-            if (sets == null) {
-                sets = new java.util.ArrayList<>();
-                mStoredGame.setSets(sets);
-            }
-            if (sets.isEmpty()) {
-                com.tonkar.volleyballreferee.engine.api.model.SetDto set0 = new com.tonkar.volleyballreferee.engine.api.model.SetDto();
-                try { set0.setIndex(0); } catch (Throwable ignored2) {}
-                set0.setHomeCourt(new com.tonkar.volleyballreferee.engine.api.model.CourtDto());
-                set0.setGuestCourt(new com.tonkar.volleyballreferee.engine.api.model.CourtDto());
-                set0.setHomeBench(new java.util.ArrayList<>());
-                set0.setGuestBench(new java.util.ArrayList<>());
-                sets.add(set0);
+        TeamDto homeTeam = mStoredGame.getTeam(TeamType.HOME);
+        homeTeam.setId(mGame.getTeamId(TeamType.HOME));
+        homeTeam.setCreatedBy(mGame.getCreatedBy(TeamType.HOME));
+        homeTeam.setCreatedAt(mGame.getCreatedAt(TeamType.HOME));
+        homeTeam.setUpdatedAt(mGame.getUpdatedAt(TeamType.HOME));
+        homeTeam.setKind(mGame.getTeamsKind());
+        homeTeam.setGender(mGame.getGender(TeamType.HOME));
+        homeTeam.setName(mGame.getTeamName(TeamType.HOME));
+        homeTeam.setColorInt(mGame.getTeamColor(TeamType.HOME));
+        homeTeam.setLiberoColorInt(mGame.getLiberoColor(TeamType.HOME));
+        homeTeam.setCaptain(mGame.getCaptain(TeamType.HOME));
+        homeTeam.setCoach(mGame.getCoachName(TeamType.HOME));
+
+        for (PlayerDto player : mGame.getPlayers(TeamType.HOME)) {
+            if (mGame.isLibero(TeamType.HOME, player.getNum())) {
+                homeTeam.getLiberos().add(player);
             } else {
-                com.tonkar.volleyballreferee.engine.api.model.SetDto set0 = sets.get(0);
-                if (set0.getHomeCourt() == null) set0.setHomeCourt(new com.tonkar.volleyballreferee.engine.api.model.CourtDto());
-                if (set0.getGuestCourt() == null) set0.setGuestCourt(new com.tonkar.volleyballreferee.engine.api.model.CourtDto());
-                if (set0.getHomeBench() == null) set0.setHomeBench(new java.util.ArrayList<>());
-                if (set0.getGuestBench() == null) set0.setGuestBench(new java.util.ArrayList<>());
+                homeTeam.getPlayers().add(player);
             }
-        } catch (Throwable ignored) {}
+        }
+
+        TeamDto guestTeam = mStoredGame.getTeam(TeamType.GUEST);
+        guestTeam.setId(mGame.getTeamId(TeamType.GUEST));
+        guestTeam.setCreatedBy(mGame.getCreatedBy(TeamType.GUEST));
+        guestTeam.setCreatedAt(mGame.getCreatedAt(TeamType.GUEST));
+        guestTeam.setUpdatedAt(mGame.getUpdatedAt(TeamType.GUEST));
+        guestTeam.setKind(mGame.getTeamsKind());
+        guestTeam.setGender(mGame.getGender(TeamType.GUEST));
+        guestTeam.setName(mGame.getTeamName(TeamType.GUEST));
+        guestTeam.setColorInt(mGame.getTeamColor(TeamType.GUEST));
+        guestTeam.setLiberoColorInt(mGame.getLiberoColor(TeamType.GUEST));
+        guestTeam.setCaptain(mGame.getCaptain(TeamType.GUEST));
+        guestTeam.setCoach(mGame.getCoachName(TeamType.GUEST));
+
+        for (PlayerDto player : mGame.getPlayers(TeamType.GUEST)) {
+            if (mGame.isLibero(TeamType.GUEST, player.getNum())) {
+                guestTeam.getLiberos().add(player);
+            } else {
+                guestTeam.getPlayers().add(player);
+            }
+        }
+
+        mStoredGame.setRules(mGame.getRules());
+
+        updateCurrentGame();
     }
-    
+
+    private void updateCurrentGame() {
+        if (mStoredGame != null) {
+            mStoredGame.setUpdatedAt(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTime().getTime());
+            mStoredGame.setMatchStatus(mGame.isMatchCompleted() ? GameStatus.COMPLETED : GameStatus.LIVE);
+            mStoredGame.setSets(TeamType.HOME, mGame.getSets(TeamType.HOME));
+            mStoredGame.setSets(TeamType.GUEST, mGame.getSets(TeamType.GUEST));
+            mStoredGame.setScore(mGame.getScore());
+            mStoredGame.setStartTime(mGame.getStartTime());
+            mStoredGame.setEndTime(mGame.getEndTime());
+
+            mStoredGame.getSets().clear();
+
+            for (int setIndex = 0; setIndex < mGame.getNumberOfSets(); setIndex++) {
+                SetDto set = new SetDto();
+
+                set.setDuration(mGame.getSetDuration(setIndex));
+                set.setStartTime(mGame.getSetStartTime(setIndex));
+                set.setEndTime(mGame.getSetEndTime(setIndex));
+                set.getLadder().addAll(mGame.getPointsLadder(setIndex));
+                set.setServing(mGame.getServingTeam(setIndex));
+                set.setFirstServing(mGame.getFirstServingTeam(setIndex));
+
+                set.setPoints(TeamType.HOME, mGame.getPoints(TeamType.HOME, setIndex));
+                set.setTimeouts(TeamType.HOME, mGame.countRemainingTimeouts(TeamType.HOME, setIndex));
+
+                CourtDto homeCurrentPlayers = set.getCurrentPlayers(TeamType.HOME);
+                for (PositionType position : PositionType.listPositions(mGame.getKind())) {
+                    homeCurrentPlayers.setPlayerAt(mGame.getPlayerAtPosition(TeamType.HOME, position, setIndex), position);
+                }
+
+                for (TimeoutDto timeout : mGame.getCalledTimeouts(TeamType.HOME, setIndex)) {
+                    set.getCalledTimeouts(TeamType.HOME).add(new TimeoutDto(timeout.getHomePoints(), timeout.getGuestPoints()));
+                }
+
+                set.setPoints(TeamType.GUEST, mGame.getPoints(TeamType.GUEST, setIndex));
+                set.setTimeouts(TeamType.GUEST, mGame.countRemainingTimeouts(TeamType.GUEST, setIndex));
+
+                CourtDto guestCurrentPlayers = set.getCurrentPlayers(TeamType.GUEST);
+                for (PositionType position : PositionType.listPositions(mGame.getKind())) {
+                    guestCurrentPlayers.setPlayerAt(mGame.getPlayerAtPosition(TeamType.GUEST, position, setIndex), position);
+                }
+
+                for (TimeoutDto timeout : mGame.getCalledTimeouts(TeamType.GUEST, setIndex)) {
+                    set.getCalledTimeouts(TeamType.GUEST).add(new TimeoutDto(timeout.getHomePoints(), timeout.getGuestPoints()));
+                }
+
+                if (mGame instanceof IClassicTeam indoorTeam) {
+
+                    CourtDto homeStartingPlayers = set.getStartingPlayers(TeamType.HOME);
+                    for (PositionType position : PositionType.listPositions(mGame.getKind())) {
+                        homeStartingPlayers.setPlayerAt(mGame.getPlayerAtPositionInStartingLineup(TeamType.HOME, position, setIndex),
+                                                        position);
+                    }
+
+                    for (SubstitutionDto substitution : indoorTeam.getSubstitutions(TeamType.HOME, setIndex)) {
+                        set
+                                .getSubstitutions(TeamType.HOME)
+                                .add(new SubstitutionDto(substitution.getPlayerIn(), substitution.getPlayerOut(),
+                                                         substitution.getHomePoints(), substitution.getGuestPoints()));
+                    }
+
+                    CourtDto guestStartingPlayers = set.getStartingPlayers(TeamType.GUEST);
+                    for (PositionType position : PositionType.listPositions(mGame.getKind())) {
+                        guestStartingPlayers.setPlayerAt(mGame.getPlayerAtPositionInStartingLineup(TeamType.GUEST, position, setIndex),
+                                                         position);
+                    }
+
+                    for (SubstitutionDto substitution : indoorTeam.getSubstitutions(TeamType.GUEST, setIndex)) {
+                        set
+                                .getSubstitutions(TeamType.GUEST)
+                                .add(new SubstitutionDto(substitution.getPlayerIn(), substitution.getPlayerOut(),
+                                                         substitution.getHomePoints(), substitution.getGuestPoints()));
+                    }
+
+                    set.setGameCaptain(TeamType.HOME, indoorTeam.getGameCaptain(TeamType.HOME, setIndex));
+                    set.setGameCaptain(TeamType.GUEST, indoorTeam.getGameCaptain(TeamType.GUEST, setIndex));
+                }
+
+                mStoredGame.getSets().add(set);
+            }
+
+            
+
+            // Prune a trailing empty set to avoid shifting the 'current' set index.
+            int lastIndex = mStoredGame.getNumberOfSets() - 1;
+            if (lastIndex > 0) {
+                boolean noPoints = mStoredGame.getPoints(TeamType.HOME, lastIndex) == 0
+                        && mStoredGame.getPoints(TeamType.GUEST, lastIndex) == 0;
+                boolean noSubs = mStoredGame.getSubstitutions(TeamType.HOME, lastIndex).isEmpty()
+                        && mStoredGame.getSubstitutions(TeamType.GUEST, lastIndex).isEmpty();
+                boolean noLineup = !mStoredGame.isStartingLineupConfirmed(TeamType.HOME, lastIndex)
+                        && !mStoredGame.isStartingLineupConfirmed(TeamType.GUEST, lastIndex);
+                if (noPoints && noSubs && noLineup) {
+                    mStoredGame.getSets().remove(lastIndex);
+                }
+            }
+mStoredGame.getAllSanctions(TeamType.HOME).clear();
+
+            for (SanctionDto sanction : mGame.getAllSanctions(TeamType.HOME)) {
+                mStoredGame
+                        .getAllSanctions(TeamType.HOME)
+                        .add(new SanctionDto(sanction.getCard(), sanction.getNum(), sanction.getSet(), sanction.getHomePoints(),
+                                             sanction.getGuestPoints()));
+            }
+
+            mStoredGame.getAllSanctions(TeamType.GUEST).clear();
+
+            for (SanctionDto sanction : mGame.getAllSanctions(TeamType.GUEST)) {
+                mStoredGame
+                        .getAllSanctions(TeamType.GUEST)
+                        .add(new SanctionDto(sanction.getCard(), sanction.getNum(), sanction.getSet(), sanction.getHomePoints(),
+                                             sanction.getGuestPoints()));
+            }
+        }
+    }
+
+    public static List<StoredGame> readStoredGamesStream(InputStream inputStream) throws IOException, JsonParseException {
+        try (JsonReader reader = new JsonReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+            return JsonConverters.GSON.fromJson(reader, new TypeToken<List<StoredGame>>() {}.getType());
+        }
+    }
+
+    public static StoredGame byteArrayToStoredGame(byte[] bytes) throws IOException, JsonParseException {
+        try (JsonReader reader = new JsonReader(new InputStreamReader(new ByteArrayInputStream(bytes)))) {
+            return JsonConverters.GSON.fromJson(reader, StoredGame.class);
+        }
+    }
+
+    public static void writeStoredGamesStream(OutputStream outputStream,
+                                              List<StoredGame> storedGames) throws JsonParseException, IOException {
+        OutputStreamWriter writer = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8);
+        JsonConverters.GSON.toJson(storedGames, new TypeToken<List<StoredGame>>() {}.getType(), writer);
+        writer.close();
+    }
+
+    public static byte[] storedGameToByteArray(StoredGame game) throws JsonParseException {
+        return JsonConverters.GSON.toJson(game, StoredGame.class).getBytes();
+    }
+
+    @Override
+    public void downloadGame(final String id, final AsyncGameRequestListener listener) {
+        if (PrefUtils.canSync(mContext)) {
+            VbrApi.getInstance(mContext).getGame(id, mContext, new Callback() {
+                @Override
+                public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                    call.cancel();
+                    listener.onError(HttpURLConnection.HTTP_INTERNAL_ERROR);
+                }
+
+                @Override
+                public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                    if (response.code() == HttpURLConnection.HTTP_OK) {
+                        try (ResponseBody body = response.body()) {
+                            StoredGame storedGame = JsonConverters.GSON.fromJson(body.string(), StoredGame.class);
+                            listener.onGameReceived(storedGame);
+                        }
+                    } else {
+                        Log.e(Tags.STORED_GAMES, String.format(Locale.getDefault(), "Error %d getting game", response.code()));
+                        listener.onError(response.code());
+                    }
+                }
+            });
+        } else {
+            listener.onError(HttpURLConnection.HTTP_INTERNAL_ERROR);
+        }
+    }
+
+    @Override
+    public void downloadAvailableGames(final AsyncGameRequestListener listener) {
+        if (PrefUtils.canSync(mContext)) {
+            VbrApi.getInstance(mContext).getAvailableGames(mContext, new Callback() {
+                @Override
+                public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                    call.cancel();
+                    listener.onError(HttpURLConnection.HTTP_INTERNAL_ERROR);
+                }
+
+                @Override
+                public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                    if (response.code() == HttpURLConnection.HTTP_OK) {
+                        try (ResponseBody body = response.body()) {
+                            List<GameSummaryDto> games = JsonConverters.GSON.fromJson(body.string(),
+                                                                                      new TypeToken<List<GameSummaryDto>>() {}.getType());
+                            listener.onAvailableGamesReceived(games);
+                        }
+                    } else {
+                        Log.e(Tags.STORED_GAMES,
+                              String.format(Locale.getDefault(), "Error %d getting available games list", response.code()));
+                        listener.onError(response.code());
+                    }
+                }
+            });
+        } else {
+            listener.onError(HttpURLConnection.HTTP_INTERNAL_ERROR);
+        }
+    }
+
+    @Override
+    public void scheduleGame(GameSummaryDto gameDescription, final boolean create, final DataSynchronizationListener listener) {
+        if (PrefUtils.canSync(mContext)) {
+            VbrApi.getInstance(mContext).scheduleGame(gameDescription, create, mContext, new Callback() {
+                @Override
+                public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                    call.cancel();
+                    if (listener != null) {
+                        listener.onSynchronizationFailed();
+                    }
+                }
+
+                @Override
+                public void onResponse(@NonNull Call call, @NonNull Response response) {
+                    if (response.code() == HttpURLConnection.HTTP_CREATED || response.code() == HttpURLConnection.HTTP_OK) {
+                        if (listener != null) {
+                            listener.onSynchronizationSucceeded();
+                        }
+                    } else {
+                        Log.e(Tags.STORED_GAMES,
+                              String.format(Locale.getDefault(), "Error %d while sending the scheduled game", response.code()));
+                        if (listener != null) {
+                            listener.onSynchronizationFailed();
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    @Override
+    public void cancelGame(String id, DataSynchronizationListener listener) {
+        if (PrefUtils.canSync(mContext)) {
+            VbrApi.getInstance(mContext).deleteGame(id, mContext, new Callback() {
+                @Override
+                public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                    call.cancel();
+                }
+
+                @Override
+                public void onResponse(@NonNull Call call, @NonNull Response response) {
+                    if (response.code() == HttpURLConnection.HTTP_NO_CONTENT) {
+                        listener.onSynchronizationSucceeded();
+                    } else {
+                        Log.e(Tags.STORED_GAMES,
+                              String.format(Locale.getDefault(), "Error %d while canceling the scheduled game", response.code()));
+                        listener.onSynchronizationFailed();
+                    }
+                }
+            });
+        } else {
+            listener.onSynchronizationFailed();
+        }
+    }
+
+    private void deleteGameOnServer(final String id) {
+        if (PrefUtils.canSync(mContext)) {
+            VbrApi.getInstance(mContext).deleteGame(id, mContext, new Callback() {
+                @Override
+                public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                    call.cancel();
+                }
+
+                @Override
+                public void onResponse(@NonNull Call call, @NonNull Response response) {
+                    if (response.code() != HttpURLConnection.HTTP_NO_CONTENT) {
+                        Log.e(Tags.STORED_GAMES, String.format(Locale.getDefault(), "Error %d while deleting game", response.code()));
+                    }
+                }
+            });
+        }
+    }
+
+    private void pushGameToServer(final IStoredGame storedGame) {
+        if (PrefUtils.canSync(mContext) && storedGame != null && !storedGame
+                .getTeamId(TeamType.HOME)
+                .equals(storedGame.getTeamId(TeamType.GUEST))) {
+            GameDto game = (GameDto) storedGame;
+
+            VbrApi.getInstance(mContext).upsertGame(game, mContext, new Callback() {
+                @Override
+                public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                    call.cancel();
+                }
+
+                @Override
+                public void onResponse(@NonNull Call call, @NonNull Response response) {
+                    if (response.code() == HttpURLConnection.HTTP_OK) {
+                        if (GameStatus.COMPLETED.equals(game.getStatus())) {
+                            mRepository.insertGame(game, true, false);
+                        }
+                    } else {
+                        Log.e(Tags.STORED_GAMES, String.format(Locale.getDefault(), "Error %d while pushing game", response.code()));
+                    }
+                }
+            });
+        }
+    }
+
+    private synchronized void pushCurrentGameToServer() {
+        pushGameToServer(mStoredGame);
+    }
+
+    private synchronized void pushCurrentSetToServer() {
+        if (PrefUtils.canSync(mContext) && mStoredGame != null && !mStoredGame
+                .getHomeTeam()
+                .getId()
+                .equals(mStoredGame.getGuestTeam().getId())) {
+            VbrApi.getInstance(mContext).updateSet(mStoredGame, mContext, new Callback() {
+                @Override
+                public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                    call.cancel();
+                }
+
+                @Override
+                public void onResponse(@NonNull Call call, @NonNull Response response) {
+                    if (response.code() != HttpURLConnection.HTTP_OK) {
+                        Log.e(Tags.STORED_GAMES, String.format(Locale.getDefault(), "Error %d while patching set", response.code()));
+                        pushCurrentGameToServer();
+                    }
+                }
+            });
+        }
+    }
+
+    @Override
+    public void syncGames() {
+        syncGames(null);
+    }
+
+    @Override
+    public void syncGames(final DataSynchronizationListener listener) {
+        if (PrefUtils.canSync(mContext)) {
+            syncGames(new ArrayList<>(), 0, 50, listener);
+        } else {
+            if (listener != null) {
+                listener.onSynchronizationFailed();
+            }
+        }
+    }
+
+    private void syncGames(List<GameSummaryDto> remoteGameList, int page, int size, DataSynchronizationListener listener) {
+        VbrApi.getInstance(mContext).getCompletedGames(page, size, mContext, new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                call.cancel();
+                if (listener != null) {
+                    listener.onSynchronizationFailed();
+                }
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                if (response.code() == HttpURLConnection.HTTP_OK) {
+                    try (ResponseBody body = response.body()) {
+                        PageDto<GameSummaryDto> gamesPage = JsonConverters.GSON.fromJson(body.string(),
+                                                                                         new TypeToken<PageDto<GameSummaryDto>>() {}.getType());
+                        remoteGameList.addAll(gamesPage.getContent());
+                        if (gamesPage.isLast()) {
+                            syncGames(remoteGameList, listener);
+                        } else {
+                            syncGames(remoteGameList, page + 1, size, listener);
+                        }
+                    }
+                } else {
+                    Log.e(Tags.STORED_GAMES, String.format(Locale.getDefault(), "Error %d while synchronising games", response.code()));
+                    if (listener != null) {
+                        listener.onSynchronizationFailed();
+                    }
+                }
+            }
+        });
+    }
+
+    private void syncGames(List<GameSummaryDto> remoteGameList, DataSynchronizationListener listener) {
+        UserSummaryDto user = PrefUtils.getUser(mContext);
+        List<GameSummaryDto> localGameList = listGames();
+        Queue<GameSummaryDto> remoteGamesToDownload = new LinkedList<>();
+        boolean afterPurchase = false;
+
+        // User purchased web services, write his user id
+        for (GameSummaryDto localGame : localGameList) {
+            if (StringUtils.isBlank(localGame.getCreatedBy())) {
+                StoredGame game = (StoredGame) getGame(localGame.getId());
+                game.setCreatedBy(user.getId());
+                game.setRefereedBy(user.getId());
+                game.setRefereeName(user.getPseudo());
+                game.setUpdatedAt(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTime().getTime());
+                mRepository.insertGame(game, false, true);
+                afterPurchase = true;
+            }
+        }
+
+        if (afterPurchase) {
+            localGameList = listGames();
+        }
+
+        for (GameSummaryDto localGame : localGameList) {
+            boolean foundRemoteVersion = false;
+
+            for (GameSummaryDto remoteGame : remoteGameList) {
+                if (localGame.getId().equals(remoteGame.getId())) {
+                    foundRemoteVersion = true;
+
+                    if (localGame.getUpdatedAt() < remoteGame.getUpdatedAt()) {
+                        remoteGamesToDownload.add(remoteGame);
+                    } else if (localGame.getUpdatedAt() > remoteGame.getUpdatedAt()) {
+                        StoredGame game = (StoredGame) getGame(localGame.getId());
+                        pushGameToServer(game);
+                    }
+                }
+            }
+
+            if (!foundRemoteVersion) {
+                if (localGame.isSynced()) {
+                    // if the game was synced, then it was deleted from the server and it must be deleted locally
+                    deleteGame(localGame.getId());
+                } else {
+                    // if the game was not synced, then it is missing from the server because sending it must have failed, so send it again
+                    StoredGame game = (StoredGame) getGame(localGame.getId());
+                    pushGameToServer(game);
+                }
+            }
+        }
+
+        for (GameSummaryDto remoteGame : remoteGameList) {
+            boolean foundLocalVersion = false;
+
+            for (GameSummaryDto localGame : localGameList) {
+                if (localGame.getId().equals(remoteGame.getId())) {
+                    foundLocalVersion = true;
+                    break;
+                }
+            }
+
+            if (!foundLocalVersion) {
+                remoteGamesToDownload.add(remoteGame);
+            }
+        }
+
+        downloadGamesRecursive(remoteGamesToDownload, listener);
+    }
+
+    private void downloadGamesRecursive(final Queue<GameSummaryDto> remoteGames, final DataSynchronizationListener listener) {
+        if (remoteGames.isEmpty()) {
+            if (listener != null) {
+                listener.onSynchronizationSucceeded();
+            }
+        } else {
+            GameSummaryDto remoteGame = remoteGames.poll();
+            VbrApi.getInstance(mContext).getGame(remoteGame.getId(), mContext, new Callback() {
+                @Override
+                public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                    call.cancel();
+                    if (listener != null) {
+                        listener.onSynchronizationFailed();
+                    }
+                }
+
+                @Override
+                public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                    if (response.code() == HttpURLConnection.HTTP_OK) {
+                        try (ResponseBody body = response.body()) {
+                            GameDto game = JsonConverters.GSON.fromJson(body.string(), GameDto.class);
+                            mRepository.insertGame(game, true, false);
+                            downloadGamesRecursive(remoteGames, listener);
+                        }
+                    } else {
+                        Log.e(Tags.STORED_GAMES, String.format(Locale.getDefault(), "Error %d while synchronising games", response.code()));
+                        if (listener != null) {
+                            listener.onSynchronizationFailed();
+                        }
+                    }
+                }
+            });
+        }
+    }
 }
