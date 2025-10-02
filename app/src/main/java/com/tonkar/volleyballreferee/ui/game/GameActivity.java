@@ -710,6 +710,21 @@ public class GameActivity extends AppCompatActivity
 
     @Override
     protected void onResume() {
+        try {
+            // Refresh game state after returning from setup
+            if (mStoredGamesService != null) {
+                mGame = mStoredGamesService.loadCurrentGame();
+                if (mGame != null && mViewPager != null) {
+                    // rebind services to fragments and ask court to refresh
+                    getSupportFragmentManager().getFragments().forEach(fragment -> {
+                        if (fragment instanceof IndoorCourtFragment court) {
+                            court.refreshCourt();
+                        }
+                    });
+                }
+            }
+        } catch (Throwable ignored) {}
+
         super.onResume();
         if (preSignCoaches && !askedPreSignOnce) {
             askedPreSignOnce = true;
