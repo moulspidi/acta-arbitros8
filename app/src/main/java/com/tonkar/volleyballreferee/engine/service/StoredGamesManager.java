@@ -222,8 +222,17 @@ public class StoredGamesManager implements StoredGamesService, ScoreListener, Te
         // No-op in local variant; immediately succeed with empty list
         if (listener != null) {
             try {
-                listener.onSynchronizationSucceeded(new java.util.ArrayList<>());
+                listener.onAvailableGamesReceived(new java.util.ArrayList<com.tonkar.volleyballreferee.engine.api.model.GameSummaryDto>());
             } catch (Throwable ignored) {}
+        }
+    }
+    
+
+    @Override
+    public void downloadGame(String id, AsyncGameRequestListener listener) {
+        // No-op: report not found
+        if (listener != null) {
+            try { listener.onError(404); } catch (Throwable ignored) {}
         }
     }
     
