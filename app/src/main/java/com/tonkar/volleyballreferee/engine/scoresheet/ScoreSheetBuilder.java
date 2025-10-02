@@ -1272,10 +1272,10 @@ return sanctionDiv;
             + "                margin-right:-1px; margin-left:-1px; }\n"
             + "      .new-page-for-printers { break-before: page; }\n"
             + "    
-.sanctions-section{grid-column:1/-1;width:100%;clear:both;}
-
-.sanctions-section{grid-column:1/-1;width:100%;clear:both;}
-</style>\n"
+"            + "      .sanctions-section{grid-column:1/-1;width:100%;clear:both;}
+"
+"            + "    </style>
+"
             + "    <style type=\"text/css\" media=\"print\"> body { -webkit-print-color-adjust: exact; } </style>\n"
             + "  </head>\n"
             + "  <body class=\"vbr-body\"></body>\n"
